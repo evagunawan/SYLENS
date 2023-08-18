@@ -352,6 +352,16 @@ logging.info('Compressing on output: %s', args.compress)
 if args.subsample != None:
     subsample_max = int(args.subsample)
     logging.info('The amount to subsample is: %s', args.subsample)
+    logging.debug('Checking to see if subsample size is larger than file')
+    Dict_for_subsample_max = SeqIO.to_dict(SeqIO.parse(args.Read1[0], args.filetype))
+    for element in list(Dict_for_subsample_max):
+        subsample_max_IDs = []
+        if re.search(r"(^\w+.)(\w+)(.)(1$)", element):
+            subsample_max_IDs.append(element)
+        total_length = len(subsample_max_IDs)
+    if total_length < subsample_max:
+        logging.critical('Subsample size is larger than total number of samples in file. Terminating...')
+        sys.exit(1)
 if args.subsample == None:
     if args.Read1[0].endswith('.gz'):
         unzip(args.Read1[0])
@@ -370,7 +380,7 @@ if args.subsample == None:
     if subsample_max == 0:
         subsample_max = len(subsample_max_IDs_2)
     logging.info('The total amount of sampling occurring: %s', subsample_max)
-
+    
 
 
 
