@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 '''
 TODO Far future: Maybe add sam/bam file
-TODO Come up with name :D :D :D 
+DONE Come up with name :D :D :D 
 DONE Add ability to compress as a flag
-TODO Create repo in git for this project
-TODO Learn about exceptions
-Logging library https://docs.python.org/3/library/logging.html#logging-levels
+DONE Create repo in git for this project
+IN_PROCESS Learn about exceptions
+DONE? Logging library https://docs.python.org/3/library/logging.html#logging-levels
 '''
 
 #SYLENS: Sampling Yielding LEss Noticeable Samples
