@@ -2,3 +2,4 @@
 *.fastq
 *.gz
 old/
+test_1.py
