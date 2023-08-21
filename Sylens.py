@@ -272,12 +272,14 @@ r2_split_ids = []
 paired_end_1 = []
 paired_end_2 = []
 
-### Creating the parser to take user inputs and adding a description of the input ###
+
+############################################### Creating parser ###############################################
 # Downsampler program description 
 parser = argparse.ArgumentParser( 
     prog = 'Subsampler for FASTQ file(s)',
     description= 'Enter in FASTQ file(s) and down sample based on a user supplied integer. If no user input is added the entire file is sampled and output as chosen filetype.',
-    epilog = 'This is supposed to show the epilog at the bottom of help, but I do not know how to write an epilog, haha')
+    epilog = "This is supposed to show the epilog at the bottom of help, but I don't know how to write an epilog, haha"
+    )
 
 
 # Creating a function which takes in a filename.fastq or R1.fastq. The number of arguments needed here is 1
@@ -438,7 +440,7 @@ if args.Read2 == None:
                 if args.Read1[0].endswith('.gz'):
                     gzip_output_file('down_sampled_interleaved', f'down_sampled_{args.Read1[0]}')
                 else:
-                    compress('down_sampled_interleaved', f'down_sampled_{args.Read1[0]}.gz')
+                    compress('down_sampled_interleaved', f'down_sampled_{args.Read1[0]}')
             if args.subsample == None:
                 no_downsample_interleaved_file(R1_dict)
                 if args.Read1[0].endswith('.gz'):
@@ -583,5 +585,5 @@ if args.Read2 != None:
                             compress('non_down_sampled_R2', f'non_down_sampled_{args.Read2}')
 
 
-### Everything is doooooonnnnnnnnnnneeeeeeeeeeeeeeeeeeeeeeeeeee ###
+### Everything is doooooonnnnnnnnnnneeeeeeeeeeeeeeeeeeeeeeeeeee hopefully ###
 logging.info('Yay, all finished! :)')
