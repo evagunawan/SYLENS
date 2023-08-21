@@ -353,15 +353,20 @@ if args.subsample != None:
     subsample_max = int(args.subsample)
     logging.info('The amount to subsample is: %s', args.subsample)
     logging.debug('Checking to see if subsample size is larger than file')
-    Dict_for_subsample_max = SeqIO.to_dict(SeqIO.parse(args.Read1[0], args.filetype))
+    if args.Read1[0].endswith('.gz'):
+        unzip(args.Read1[0])
+        Dict_for_subsample_max = SeqIO.to_dict(SeqIO.parse('out_file.fastq', args.filetype))
+    else:
+        Dict_for_subsample_max = SeqIO.to_dict(SeqIO.parse(args.Read1[0], args.filetype))
+    subsample_max_IDs = []
     for element in list(Dict_for_subsample_max):
-        subsample_max_IDs = []
         if re.search(r"(^\w+.)(\w+)(.)(1$)", element):
             subsample_max_IDs.append(element)
-        total_length = len(subsample_max_IDs)
+    total_length = len(subsample_max_IDs)
     if total_length < subsample_max:
         logging.critical('Subsample size is larger than total number of samples in file. Terminating...')
         sys.exit(1)
+    
 if args.subsample == None:
     if args.Read1[0].endswith('.gz'):
         unzip(args.Read1[0])
@@ -406,15 +411,15 @@ if args.Read2 == None:
         sys.exit(1)    
 
 
-# Regular expression looks if an interleaved file was supplied.If first entry ends with ".1" and the last record ends with a ".2", interleaved file. If a subsample size was added, the
+# Regular expression looks if an interleaved file was supplied. If first entry ends with ".1" and the last record ends with a ".2", interleaved file. If a subsample size was added, the
 # downsample_interleaved_file function is run. If a subsample size is not indicated, the no_downsample_interleaved_file is run. 
     elif re.search(r"(^\w+.)(\w+)(.)(2$)", last_record):
         if re.search(r"(^\w+.)(\w+)(.)(1$)", first_record):
             if args.subsample != None:
                 downsample_interleaved_file(R1_dict, subsample_max)
                 if args.Read1[0].endswith('.gz'):
-                    gzip_output_file(f'down_sampled_{args.Read1[0]}.fastq', f'down_sampled_{args.Read1[0]}.fastq.gz')
-                compress(f'down_sampled_{args.Read1[0]}', f'down_sampled_{args.Read1[0]}.gz')
+                    gzip_output_file(f'down_sampled_{args.Read1[0]}', f'down_sampled_{args.Read1[0]}')
+                compress(f'down_sampled_{args.Read1[0]}', f'down_sampled_{args.Read1[0]}')
             if args.subsample == None:
                 no_downsample_interleaved_file(R1_dict)
                 if args.Read1[0].endswith('.gz'):
@@ -478,36 +483,24 @@ if args.Read2 != None:
     if re.search(r"(^\w+.)(\w+)(.)(1$)", last_record_1):
         if re.search(r"(^\w+.)(\w+)(.)(1$)", last_record_2):
             logging.critical("Both supplied files appear to be Read 1 files. Program terminating...")
-            if os.path.exists('out_file.fastq'):
-                os.remove('out_file.fastq')
-            if os.path.exists('out_file_2.fastq'):
-                os.remove('out_file_2.fastq')
+            remove_nonsense_files()
             sys.exit(1)
     if re.search(r"(^\w+.)(\w+)(.)(2$)", last_record_1):
         if re.search(r"(^\w+.)(\w+)(.)(2$)", first_record_1):
             if re.search(r"(^\w+.)(\w+)(.)(2$)", last_record_2):
                 if re.search(r"(^\w+.)(\w+)(.)(2$)", first_record_2):
                     logging.critical("Both supplied files appear to be Read 2 files. Program terminating...")
-                    if os.path.exists('out_file.fastq'):
-                        os.remove('out_file.fastq')
-                    if os.path.exists('out_file_2.fastq'):
-                        os.remove('out_file_2.fastq')
+                    remove_nonsense_files()
                     sys.exit(1)
     if re.search(r"(^\w+.)(\w+)(.)(2$)", last_record_1):
         if re.search(r"(^\w+.)(\w+)(.)(1$)", first_record_1):
             logging.critical("First input file is interleaved. Program terminating...")
-            if os.path.exists('out_file.fastq'):
-                os.remove('out_file.fastq')
-            if os.path.exists('out_file_2.fastq'):
-                os.remove('out_file_2.fastq')
+            remove_nonsense_files()
             sys.exit(1)
     if re.search(r"(^\w+.)(\w+)(.)(2$)", last_record_2):
         if re.search(r"(^\w+.)(\w+)(.)(1$)", first_record_2):
             logging.critical("Second input file is interleaved. Program terminating...")
-            if os.path.exists('out_file.fastq'):
-                os.remove('out_file.fastq')
-            if os.path.exists('out_file_2.fastq'):
-                os.remove('out_file_2.fastq')
+            remove_nonsense_files()
             sys.exit(1)
     
     
