@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 '''
 TODO Far future: Maybe add sam/bam file
-DONE Come up with name :D :D :D 
-DONE Add ability to compress as a flag
-DONE Create repo in git for this project
 IN_PROCESS Learn about exceptions
 DONE? Logging library https://docs.python.org/3/library/logging.html#logging-levels
 '''
@@ -31,6 +28,7 @@ def unzip(input_file):
     with gzip.open(input_file, 'rb') as fileobj:
         with open('out_file.fastq', 'wb') as output:
             shutil.copyfileobj(fileobj, output)
+            logging.debug(f'SUCCESS: finished unzip {input_file}')
 
           
 def unzip_2(input_file_2):
@@ -38,6 +36,7 @@ def unzip_2(input_file_2):
     with gzip.open(input_file_2, 'rb') as fileobj:
         with open('out_file_2.fastq', 'wb') as output:
             shutil.copyfileobj(fileobj, output)
+            logging.debug(f'SUCCESS: finished unzip {input_file_2}')
 
 
 '''
@@ -53,6 +52,7 @@ def downsample_single_end_file(dictionary_name, subsample_max):
     logging.info('Writing to file...')
     SeqIO.write(single_file_output, IDs_Seq_File, args.output)
     logging.info("Done writing to: down_sampled_single_end")
+    logging.debug('SUCCESS: finished downsample_single_end_file')
 
 
 '''
@@ -90,6 +90,7 @@ def downsample_interleaved_file(dictionary_name, subsample_max):
                 SeqIO.write(output_2[R2_count], IDs_Seq_File, args.output)
                 R2_count += 1
     logging.info(f"Done writing to: down_sampled_interleaved")
+    logging.debug('SUCCESS: finished down_sample_interleaved_file')
 
 
 '''
@@ -117,6 +118,7 @@ def downsample_paired_end_files(dictionary_name_1, dictionary_name_2, subsample_
     SeqIO.write(output_1, IDs_Seq_File, args.output)
     SeqIO.write(output_2, IDs_Seq_File_2, args.output)
     logging.info("Done writing to: down_sampled_R1 and down_sampled_R2") 
+    logging.debug('SUCCESS: finished downsample_paired_end_files')
 
 
 #function to downsample switched paired end file
@@ -139,6 +141,7 @@ def switched_downsample_paired_end_files(dictionary_name_1, dictionary_name_2, s
     SeqIO.write(output_1, IDs_Seq_File, args.output)
     SeqIO.write(output_2, IDs_Seq_File_2, args.output)
     logging.info("Done writing to: down_sampled_R2 and down_sampled_R1") 
+    logging.debug('SUCCESS: finished switched_downsample_paired_end_file')
 
 
 '''
@@ -154,6 +157,7 @@ def no_downsample_single_end_file(dictionary_name):
     logging.info('Writing to file...')
     SeqIO.write(All_output, IDs_Seq_File, args.output)
     logging.info('Done writing to: non_down_sampled_single_end')
+    logging.debug('SUCCESS: finished no_downsample_single_end_file')
 
 
 '''
@@ -187,6 +191,7 @@ def no_downsample_interleaved_file(dictionary_name):
                 SeqIO.write(output_2[R2_count], IDs_Seq_File, args.output)
                 R2_count += 1
     logging.info("Done writing to: non_down_sampled_interleaved")
+    logging.debug('SUCCESS: finished no_downsample_interleaved_file')
 
 
 '''
@@ -210,6 +215,7 @@ def no_downsample_paired_end_files(dictionary_name_1, dictionary_name_2):
     SeqIO.write(output_1, IDs_Seq_File, args.output)
     SeqIO.write(output_2, IDs_Seq_File_2, args.output)
     logging.info("Done writing to: non_down_sampled_R1 and non_down_sampled_R2")
+    logging.debug('SUCCESS: finished no_downsample_paired_end_files')
 
 
 #function to not downsample switched paired end files
@@ -229,6 +235,7 @@ def switched_no_downsample_paired_end_files(dictionary_name_1, dictionary_name_2
     SeqIO.write(output_1, IDs_Seq_File, args.output)
     SeqIO.write(output_2, IDs_Seq_File_2, args.output)
     logging.info(f"Done writing to: non_down_sampled_R1 and non_down_sampled_R2")
+    logging.debug('SUCCESS: finished switched_no_dowsample_paired_end_files')
 
 
 #function to zip files
@@ -239,6 +246,7 @@ def gzip_output_file(original_file, new_output_file):
             logging.info(f'Renaming file: {new_output_file}')
             if os.path.exists(original_file):
                 os.remove(original_file)
+            logging.debug(f'SUCCESS: finished gzip {new_output_file}')
 
 
 #function to gzip a file if -c == yes ###
@@ -248,10 +256,12 @@ def compress(original_file, new_output_file):
             gzip_output_file(original_file, str(new_output_file) + ".gz")
             if os.path.exists(original_file):
                 os.remove(original_file)
+            logging.debug(f'SUCCESS: finished compress == yes {new_output_file}')
     else:
         logging.info('Processing output...')
         os.rename(original_file, new_output_file)
         logging.info(f'Renaming file: {new_output_file}')
+        logging.debug(f'SUCCESS: finished compress == no {new_output_file}')
 
 #function to remove generated files
 def remove_nonsense_files():
@@ -260,6 +270,7 @@ def remove_nonsense_files():
         os.remove('out_file.fastq')
     if os.path.exists('out_file_2.fastq'):
         os.remove('out_file_2.fastq')
+    logging.debug('SUCCESS: finished removing_nonsense_files')
 
 
 ### Defining a few empty lists ###
@@ -377,8 +388,10 @@ if args.subsample != None:
     if args.Read1[0].endswith('.gz'):
         unzip(args.Read1[0])
         Dict_for_subsample_max = SeqIO.to_dict(SeqIO.parse('out_file.fastq', args.filetype))
+        logging.debug('SUCCESS: made dictionary for subsampled zipped file')
     else:
         Dict_for_subsample_max = SeqIO.to_dict(SeqIO.parse(args.Read1[0], args.filetype))
+        logging.debug('SUCCESS: made dictionary for subsampled unzipped file')
     subsample_max_IDs = []
     subsample_max_IDs_2 = []
     for element in list(Dict_for_subsample_max):
@@ -386,10 +399,16 @@ if args.subsample != None:
             subsample_max_IDs.append(element)
         if re.search(r"(^\w+.)(\w+)(.)(2$)", element):
             subsample_max_IDs_2.append(element)
+    logging.debug('SUCCESS: made .1 list for subsample max')
+    logging.debug('SUCCESS: made .2 list for subsample max')
     total_length = len(subsample_max_IDs)
     if total_length == 0:
         total_length = len(subsample_max_IDs_2) 
+        logging.warning('Total length = 0. Reset total length to amount if secondary reads. File 1 and 2 may be switched')
     if total_length < subsample_max:
+        logging.debug('FAILURE: Total length is less than subsample max')
+        logging.info(f'{total_length} = total lenght')
+        logging.info(f'{subsample_max} = subsample max')
         logging.critical('Subsample size is larger than total number of samples in file. Terminating...')
         sys.exit(1)
 
@@ -398,14 +417,18 @@ if args.subsample == None:
     if args.Read1[0].endswith('.gz'):
         unzip(args.Read1[0])
         Dict_for_subsample_max = SeqIO.to_dict(SeqIO.parse('out_file.fastq', args.filetype))
+        logging.debug('SUCCESS: made dictionary for not subsampled zipped file')
     else:
         Dict_for_subsample_max = SeqIO.to_dict(SeqIO.parse(args.Read1[0], args.filetype))
+        logging.debug('SUCCESS: made dictionary for not subsampled file')
     for element in list(Dict_for_subsample_max):
         if re.search(r"(^\w+.)(\w+)(.)(1$)", element):
             subsample_max_IDs.append(element)
         else:
             if re.search(r"(^\w+.)(\w+)(.)(2$)", element):    
                 subsample_max_IDs_2.append(element)
+        logging.debug('SUCCESS: made .1 list for subsampled')
+        logging.debug('SUCCESS: made .2 list for subsampled')
     subsample_max = len(subsample_max_IDs)
     if subsample_max == 0:
         subsample_max = len(subsample_max_IDs_2)
@@ -421,14 +444,18 @@ if args.Read2 == None:
     if args.Read1[0].endswith('.gz'):
         unzip(args.Read1[0])
         R1_dict = SeqIO.to_dict(SeqIO.parse('out_file.fastq', args.filetype))
+        logging.debug('SUCCESS: made dictionary for subsampled zipped single end file')
     else:
         R1_dict =  SeqIO.to_dict(SeqIO.parse(args.Read1[0], args.filetype))
+        logging.debug('SUCCESS: made dictionary for subsampled unzipped single end file')
     last_record = list(R1_dict) [-1]
     first_record = list(R1_dict) [0]
     remove_nonsense_files()
+    logging.debug('Removed excess files produced from subsampled single end file')
 
 # If regular expression finds that both the first and last record end with '.2', it will terminate the program
     if re.search(r"(^\w+.)(\w+)(.)(2$)", first_record):
+        logging.debug('FAILURE: Found .2 read in first record indicating .2 file was provided instead of .1 file.')
         logging.critical("This appears to be a read 2 file instead of a read 1 file. Program terminating...")
         sys.exit(1)    
 
@@ -441,14 +468,18 @@ if args.Read2 == None:
                 downsample_interleaved_file(R1_dict, subsample_max)
                 if args.Read1[0].endswith('.gz'):
                     gzip_output_file('down_sampled_interleaved', f'down_sampled_{args.Read1[0]}')
+                    logging.debug('SUCCESS: gzipped output file since it came in as a compressed file in downsample_interleaved_file')
                 else:
                     compress('down_sampled_interleaved', f'down_sampled_{args.Read1[0]}')
+                    logging.debug('SUCCESS: finished compress function from downsample_interleaved_file')
             if args.subsample == None:
                 no_downsample_interleaved_file(R1_dict)
                 if args.Read1[0].endswith('.gz'):
                     gzip_output_file('non_down_sampled_interleaved', f'non_down_sampled_{args.Read1[0]}.gz')
+                    logging.debug('SUCCESS: gzipped output file since it came in as a compressed file in non_down_sample_interleaved_file')
                 else:
                     compress('non_down_sampled_interleaved', f'non_down_sampled_{args.Read1[0]}')
+                    logging.debug('SUCCESS: finished compress function from non_down_sample_interleaved_file')
             
  
 # Uses a regular expression to look at the first and last entry of the fastq. If first and last entry end with ".1", single end file. Moves into whether or not downsampling is occurring
@@ -459,16 +490,22 @@ if args.Read2 == None:
                 downsample_single_end_file(R1_dict, subsample_max)
                 if args.Read1[0].endswith('.gz'):
                     gzip_output_file('down_sampled_single_end', f'down_sampled_{args.Read1[0]}.gz')
+                    logging.debug('SUCCESS: gzipped output file since it came in as a compressed file in downsample_single_end_file')
                     remove_nonsense_files()
+                    logging.debug('SUCCESS: removed excess files created in down_sample_single_end_file')
                 else:
                     compress('down_sampled_single_end', f'down_sampled_{args.Read1[0]}')
+                    logging.debug('SUCCESS: finished compress function from down_sample_single_end_file')
             if args.subsample == None:
                 no_downsample_single_end_file(R1_dict)
                 if args.Read1[0].endswith('.gz'):
                     gzip_output_file(f'non_down_sampled_single_end', f'non_down_sampled_{args.Read1[0]}.gz')
+                    logging.debug('SUCCESS: gzipped output file since it came in as a compressed file in no_downsample_single_end_file')
                     remove_nonsense_files()
+                    logging.debug('SUCCESS: removed excess files created in no_down_sample_single_end_file')
                 else:
                     compress('non_down_sampled_single_end', f'non_down_sampled_{args.Read1[0]}')
+                    logging.debug('SUCCESS: finished compress function from no_down_sample_single_end_file')
 
 
 ############################################### Both Read 1 and 2 supplied ###############################################
@@ -479,18 +516,23 @@ if args.Read2 != None:
     if args.Read1[0].endswith('.gz'):
         unzip(args.Read1[0])
         R1_dict =  SeqIO.to_dict(SeqIO.parse('out_file.fastq', args.filetype))
+        logging.debug('SUCCESS: made dictionary for subsampled zipped R1 file')
     else:
         R1_dict =  SeqIO.to_dict(SeqIO.parse(args.Read1[0], args.filetype)) 
+        logging.debug('SUCCESS: made dictionary for subsampled unzipped R1 file')
     if args.Read2.endswith('.gz'):  
         unzip_2(args.Read2)
         R2_dict =  SeqIO.to_dict(SeqIO.parse('out_file_2.fastq', args.filetype))
+        logging.debug('SUCCESS: made dictionary for subsampled zipped R2 file')
     else:
         R2_dict =  SeqIO.to_dict(SeqIO.parse(args.Read2, args.filetype))
+        logging.debug('SUCCESS: made dictionary for subsampled unzipped R1 file')
     last_record_1 = list(R1_dict) [-1]
     first_record_1 = list(R1_dict) [0]
     last_record_2 = list(R2_dict) [-1]
     first_record_2 = list(R2_dict) [0]
     remove_nonsense_files()
+    logging.debug('Removed excess files produced from subsampled paired end files')
 
 
 #Errors if wrong files are supplied and deletes files that were made preparing for decompression, if applicable.
@@ -534,26 +576,38 @@ if args.Read2 != None:
                         switched_downsample_paired_end_files(R1_dict, R2_dict, subsample_max)
                         if args.Read1[0].endswith('.gz'):
                             gzip_output_file('down_sampled_R2', f'down_sampled_{args.Read1[0]}')
+                            logging.debug('SUCCESS: made dictionary for subsampled zipped R2 file in switched_downsample_paired_end_files')
                             remove_nonsense_files()
+                            logging.debug('SUCCESS: removed excess files created in switched_downsample_paired_end_files')
                         else:  
-                             compress('down_sampled_R2}', f'down_sampled_{args.Read1[0]}')
+                            compress('down_sampled_R2}', f'down_sampled_{args.Read1[0]}')
+                            logging.debug('SUCCESS: finished compress function for R2 from switched_downsample_paired_end_files')
                         if args.Read2.endswith('.gz'):
                             gzip_output_file('down_sampled_R1', f'down_sampled_{args.Read2}')
+                            logging.debug('SUCCESS: made dictionary for subsampled zipped R1 file in switched_downsample_paired_end_files')
                             remove_nonsense_files()
+                            logging.debug('SUCCESS: finished compress function for R1 from switched_downsample_paired_end_files')
                         else:                       
                             compress('down_sampled_R1', f'down_sampled_{args.Read2}')
+                            logging.debug('SUCCESS: finished compress function for R1 from switched_downsample_paired_end_files')
                     if args.subsample == None:
                         switched_no_downsample_paired_end_files(R1_dict, R2_dict)
                         if args.Read1[0].endswith('.gz'):
                             gzip_output_file('non_down_sampled_R2', f'non_down_sampled_{args.Read1[0]}')
+                            logging.debug('SUCCESS: made dictionary for subsampled zipped R2 file in switched_no_downsample_paired_end_files')
                             remove_nonsense_files()
+                            logging.debug('SUCCESS: removed excess files for R2 created in switched_no_downsample_paired_end_files')
                         else:
                             compress('non_down_sampled_R2', f'non_down_sampled_{args.Read1[0]}')
+                            logging.debug('SUCCESS: finished compress function for R2 from switched_no_downsample_paired_end_files')
                         if args.Read2.endswith('.gz'):
                             gzip_output_file('non_down_sampled_R1', f'non_down_sampled_{args.Read2}')
+                            logging.debug('SUCCESS: made dictionary for subsampled zipped R1 file in switched_no_downsample_paired_end_files')
                             remove_nonsense_files()
+                            logging.debug('SUCCESS: removed excess files for R1 created in switched_no_downsample_paired_end_files')
                         else:
                             compress(f'non_down_sampled_R1', f'non_down_sampled_{args.Read2}')
+                            logging.debug('SUCCESS: finished compress function for R1 from switched_no_downsample_paired_end_files')
 
     
 # As long as none of the exceptions above match, it moves on to downsample or not to downsample paired end 
@@ -565,26 +619,36 @@ if args.Read2 != None:
                         downsample_paired_end_files(R1_dict, R2_dict, subsample_max)
                         if args.Read1[0].endswith('.gz'):
                             gzip_output_file('down_sampled_R1', f'down_sampled_{args.Read1[0]}')
+                            logging.debug('SUCCESS: made dictionary for subsampled zipped R1 file in downsample_paired_end_files')
                             remove_nonsense_files()
+                            logging.debug('SUCCESS: removed excess files for R1 created in downsample_paired_end_files')
                         else:
                             compress('down_sampled_R1', f'down_sampled_{args.Read1[0]}')
+                            logging.debug('SUCCESS: finished compress function for R1 from downsample_paired_end_files')
                         if args.Read2.endswith('.gz'):
                             gzip_output_file(f'down_sampled_R2', f'down_sampled_{args.Read2}')
+                            logging.debug('SUCCESS: made dictionary for subsampled zipped R2 file in downsample_paired_end_files')
                             remove_nonsense_files()
+                            logging.debug('SUCCESS: removed excess files for R2 created in downsample_paired_end_files')
                         else:
                             compress('down_sampled_R2', f'down_sampled_{args.Read2}')
+                            logging.debug('SUCCESS: finished compress function for R1 from downsample_paired_end_files')
                     if args.subsample == None:
                         no_downsample_paired_end_files(R1_dict,R2_dict)
                         if args.Read1[0].endswith('.gz'):
                             gzip_output_file('non_down_sampled_R1', f'non_down_sampled_{args.Read1[0]}')
+                            logging.debug('SUCCESS: removed excess files for R1 created in non_downsample_paired_end_files')
                             remove_nonsense_files()
                         else:
                             compress('non_down_sampled_R1', f'non_down_sampled_{args.Read1[0]}')
+                            logging.debug('SUCCESS: finished compress function for R1 from non_downsample_paired_end_files')
                         if args.Read2.endswith('.gz'):
                             gzip_output_file(f'non_down_sampled_R2', f'non_down_sampled_{args.Read2}')
+                            logging.debug('SUCCESS: removed excess files for R2 created in non_downsample_paired_end_files')
                             remove_nonsense_files()
                         else:
                             compress('non_down_sampled_R2', f'non_down_sampled_{args.Read2}')
+                            logging.debug('SUCCESS: finished compress function for R2 from non_downsample_paired_end_files')
 
 
 ### Everything is doooooonnnnnnnnnnneeeeeeeeeeeeeeeeeeeeeeeeeee hopefully ###
