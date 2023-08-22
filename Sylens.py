@@ -236,6 +236,7 @@ def gzip_output_file(original_file, new_output_file):
     with open(original_file, 'rb') as input_file:
         with gzip.open(new_output_file, 'wb') as output_file:
             shutil.copyfileobj(input_file, output_file)
+            logging.info(f'Renaming file: {new_output_file}')
             if os.path.exists(original_file):
                 os.remove(original_file)
 
@@ -246,10 +247,11 @@ def compress(original_file, new_output_file):
         if args.Read1[0].endswith('.fastq'):
             gzip_output_file(original_file, str(new_output_file) + ".gz")
             if os.path.exists(original_file):
-                os.remove(original_file)    
+                os.remove(original_file)
     else:
-          os.rename(original_file, new_output_file)
-
+        logging.info('Processing output...')
+        os.rename(original_file, new_output_file)
+        logging.info(f'Renaming file: {new_output_file}')
 
 #function to remove generated files
 def remove_nonsense_files():
@@ -444,7 +446,7 @@ if args.Read2 == None:
             if args.subsample == None:
                 no_downsample_interleaved_file(R1_dict)
                 if args.Read1[0].endswith('.gz'):
-                    gzip_output_file(f'non_down_sampled_interleaved', f'non_down_sampled_{args.Read1[0]}.gz')
+                    gzip_output_file('non_down_sampled_interleaved', f'non_down_sampled_{args.Read1[0]}.gz')
                 else:
                     compress('non_down_sampled_interleaved', f'non_down_sampled_{args.Read1[0]}')
             
@@ -562,12 +564,12 @@ if args.Read2 != None:
                     if args.subsample != None:
                         downsample_paired_end_files(R1_dict, R2_dict, subsample_max)
                         if args.Read1[0].endswith('.gz'):
-                            gzip_output_file('down_sampled_R1', f'down_sampled_{args.Read1[0]}.gz')
+                            gzip_output_file('down_sampled_R1', f'down_sampled_{args.Read1[0]}')
                             remove_nonsense_files()
                         else:
                             compress('down_sampled_R1', f'down_sampled_{args.Read1[0]}')
                         if args.Read2.endswith('.gz'):
-                            gzip_output_file(f'down_sampled_R2', f'down_sampled_{args.Read2}.gz')
+                            gzip_output_file(f'down_sampled_R2', f'down_sampled_{args.Read2}')
                             remove_nonsense_files()
                         else:
                             compress('down_sampled_R2', f'down_sampled_{args.Read2}')
