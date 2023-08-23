@@ -240,24 +240,24 @@ def switched_no_downsample_paired_end_files(dictionary_name_1, dictionary_name_2
 
 #function to zip files
 def gzip_output_file(original_file, new_output_file):
-    with open(original_file, 'rb') as input_file:
-        with gzip.open(new_output_file, 'wb') as output_file:
-            shutil.copyfileobj(input_file, output_file)
-            logging.info(f'Renaming file: {new_output_file}')
-            if os.path.exists(original_file):
-                os.remove(original_file)
-            logging.debug(f'SUCCESS: finished gzip {new_output_file}')
-
+        with open(original_file, 'rb') as input_file:
+            with gzip.open(new_output_file, 'wb') as output_file:
+                shutil.copyfileobj(input_file, output_file)
+                logging.info(f'Renaming file: {new_output_file}')
+                if os.path.exists(original_file):
+                    os.remove(original_file)
+                logging.debug(f'SUCCESS: finished gzip {new_output_file}')
+    
 
 #function to gzip a file if -c == yes ###
 def compress(original_file, new_output_file):
-    if args.compress == 'yes': 
+    if args.compress == 'yes' or args.compress == 'YES' or args.compress == 'Yes' or args.compress == 'yES': 
         if args.Read1[0].endswith('.fastq'):
             gzip_output_file(original_file, str(new_output_file) + ".gz")
             if os.path.exists(original_file):
                 os.remove(original_file)
             logging.debug(f'SUCCESS: finished compress == yes {new_output_file}')
-    else:
+    if args.compress == 'no' or args.compress == 'NO' or args.compress == 'No' or args.compress == 'nO':
         logging.info('Processing output...')
         os.rename(original_file, new_output_file)
         logging.info(f'Renaming file: {new_output_file}')
@@ -290,7 +290,7 @@ paired_end_2 = []
 # Downsampler program description 
 parser = argparse.ArgumentParser( 
     prog = 'Subsampler for FASTQ file(s)',
-    description= 'Enter in FASTQ file(s) and down sample based on a user supplied integer. If no user input is added the entire file is sampled and output as chosen filetype.',
+    description = 'Enter in FASTQ file(s) and down sample based on a user supplied integer. If no user input is added the entire file is sampled and output as chosen filetype. If .gz files are entered, they will be compressed on output.',
     epilog = "This is supposed to show the epilog at the bottom of help, but I don't know how to write an epilog, haha"
     )
 
@@ -343,7 +343,7 @@ parser.add_argument('-o', '--output',
 
 # Creating argument to denote what type of fastq file is wanted during output
 parser.add_argument('-c', '--compress',
-    choices = ['yes', 'no'],
+    choices = ['yes', 'YES', 'Yes', 'yES', 'no', 'NO', 'No', 'nO'],
     default = 'no',
     help = "Compress fastq file into fastq.gz file on output. I.E. --c no"
     )
