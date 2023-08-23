@@ -410,7 +410,7 @@ if args.subsample != None:
         logging.debug('FAILURE: Total length is less than subsample max')
         logging.info(f'{total_length} = total lenght')
         logging.info(f'{subsample_max} = subsample max')
-        logging.critical('Subsample size is larger than total number of samples in file. Terminating...')
+        logging.critical(f'Subsample size is larger than total number of samples in file. Please provide a subsample size less than {total_length}. Terminating...')
         sys.exit(1)
 
 
