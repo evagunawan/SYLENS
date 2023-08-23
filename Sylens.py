@@ -368,23 +368,26 @@ These statements check to make sure user input has been pulled and allows to use
 They are not necessary, just somewhat helpful 
 ''' 
 if args.Read2 == None:
-    logging.info('The FASTQ filename is: %s', (args.Read1[0]))
+    logging.info(f'The FASTQ filename is: {args.Read1[0]}')
 else:
-    logging.info('The FASTQ filenames are: %s', (args.Read1[0], args.Read2))
+    logging.info(f'The FASTQ filenames are: {args.Read1[0]} and  {args.Read2}')
 
-logging.info('The input file type is: %s', args.filetype)
+logging.info(f'The input file type is: {args.filetype}')
 
-logging.info("The run's seed number is: %s", args.seed)
+logging.info(f"The run's seed number is: {args.seed}")
 
-logging.info('The output file type is: %s', args.output)
+logging.info(f'The output file type is: {args.output}')
 
-logging.info('Compressing on output: %s', args.compress)
+logging.info(f'Compressing on output: {args.compress}')
 
 
-#Ensures that the subsample integer is pulled in as a usable int not str variable or to allow for no subsampling.
+'''
+Ensures that the subsample integer is pulled in as a usable int not str variable. Also allows for no subsampling and just final conversion.
+Makes sure subsample size is not larger than total file size. If so terminates program 
+'''
 if args.subsample != None:
     subsample_max = int(args.subsample)
-    logging.info('The amount to subsample is: %s', args.subsample)
+    logging.info(f'The amount to subsample is: {args.subsample}')
     logging.debug('Checking to see if subsample size is larger than file')
     if args.Read1[0].endswith('.gz'):
         unzip(args.Read1[0])
@@ -433,7 +436,7 @@ if args.subsample == None:
     subsample_max = len(subsample_max_IDs)
     if subsample_max == 0:
         subsample_max = len(subsample_max_IDs_2)
-    logging.info('The total amount of sampling occurring: %s', subsample_max)
+    logging.info(f'The total amount of sampling occurring: {subsample_max}')
     
 
 ############################################### Only Read 1 supplied ###############################################
