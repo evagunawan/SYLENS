@@ -348,6 +348,7 @@ parser.add_argument('-c', '--compress',
     help = "Compress fastq file into fastq.gz file on output. I.E. --c no"
     )
 
+#Runs the parser and allows you to call arguments downstream
 args = parser.parse_args()
 
 
@@ -367,7 +368,7 @@ These statements check to make sure user input has been pulled and allows to use
 They are not necessary, just somewhat helpful 
 ''' 
 if args.Read2 == None:
-    logging.info('The FASTQ filename is: %s', ''.join(args.Read1))
+    logging.info('The FASTQ filename is: %s', (args.Read1[0]))
 else:
     logging.info('The FASTQ filenames are: %s', (args.Read1[0], args.Read2))
 
@@ -404,7 +405,7 @@ if args.subsample != None:
     total_length = len(subsample_max_IDs)
     if total_length == 0:
         total_length = len(subsample_max_IDs_2) 
-        logging.warning('Total length = 0. Reset total length to amount if secondary reads. File 1 and 2 may be switched')
+        logging.warning('File 1 and 2 may be switched. Recalculating length of file to ensure subsample size is not larger than file size...')
     if total_length < subsample_max:
         logging.debug('FAILURE: Total length is less than subsample max')
         logging.info(f'{total_length} = total lenght')
@@ -580,7 +581,7 @@ if args.Read2 != None:
                             remove_nonsense_files()
                             logging.debug('SUCCESS: removed excess files created in switched_downsample_paired_end_files')
                         else:  
-                            compress('down_sampled_R2}', f'down_sampled_{args.Read1[0]}')
+                            compress('down_sampled_R2', f'down_sampled_{args.Read1[0]}')
                             logging.debug('SUCCESS: finished compress function for R2 from switched_downsample_paired_end_files')
                         if args.Read2.endswith('.gz'):
                             gzip_output_file('down_sampled_R1', f'down_sampled_{args.Read2}')
