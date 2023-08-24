@@ -341,12 +341,14 @@ parser.add_argument('-o', '--output',
     help = "Add what type of fastq file is desired at output. I.E fastq-solexa"
     )
 
+
 # Creating argument to denote what type of fastq file is wanted during output
 parser.add_argument('-c', '--compress',
     choices = ['yes', 'YES', 'Yes', 'yES', 'no', 'NO', 'No', 'nO'],
     default = 'no',
     help = "Compress fastq file into fastq.gz file on output. I.E. --c no"
     )
+
 
 #Runs the parser and allows you to call arguments downstream
 args = parser.parse_args()
@@ -655,5 +657,7 @@ if args.Read2 != None:
                             logging.debug('SUCCESS: finished compress function for R2 from non_downsample_paired_end_files')
 
 
-### Everything is doooooonnnnnnnnnnneeeeeeeeeeeeeeeeeeeeeeeeeee hopefully ###
-logging.info('Yay, all finished! :)')
+'''
+Program has finished without issue. 
+'''
+logging.info('Sylens has finished processing. Closing...  ')
