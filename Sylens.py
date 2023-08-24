@@ -234,7 +234,7 @@ def switched_no_downsample_paired_end_files(dictionary_name_1, dictionary_name_2
     logging.info('Writing to file...')
     SeqIO.write(output_1, IDs_Seq_File, args.output)
     SeqIO.write(output_2, IDs_Seq_File_2, args.output)
-    logging.info(f"Done writing to: non_down_sampled_R1 and non_down_sampled_R2")
+    logging.info("Done writing to: non_down_sampled_R1 and non_down_sampled_R2")
     logging.debug('SUCCESS: finished switched_no_dowsample_paired_end_files')
 
 
@@ -505,7 +505,7 @@ if args.Read2 == None:
             if args.subsample == None:
                 no_downsample_single_end_file(R1_dict)
                 if args.Read1[0].endswith('.gz'):
-                    gzip_output_file(f'non_down_sampled_single_end', f'non_down_sampled_{args.Read1[0]}')
+                    gzip_output_file('non_down_sampled_single_end', f'non_down_sampled_{args.Read1[0]}')
                     logging.debug('SUCCESS: gzipped output file since it came in as a compressed file in no_downsample_single_end_file')
                     remove_nonsense_files()
                     logging.debug('SUCCESS: removed excess files created in no_down_sample_single_end_file')
@@ -612,7 +612,7 @@ if args.Read2 != None:
                             remove_nonsense_files()
                             logging.debug('SUCCESS: removed excess files for R1 created in switched_no_downsample_paired_end_files')
                         else:
-                            compress(f'non_down_sampled_R1', f'non_down_sampled_{args.Read2}')
+                            compress('non_down_sampled_R1', f'non_down_sampled_{args.Read2}')
                             logging.debug('SUCCESS: finished compress function for R1 from switched_no_downsample_paired_end_files')
 
     
