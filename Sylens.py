@@ -493,7 +493,7 @@ if args.Read2 == None:
             if args.subsample != None:
                 downsample_single_end_file(R1_dict, subsample_max)
                 if args.Read1[0].endswith('.gz'):
-                    gzip_output_file('down_sampled_single_end', f'down_sampled_{args.Read1[0]}.gz')
+                    gzip_output_file('down_sampled_single_end', f'down_sampled_{args.Read1[0]}')
                     logging.debug('SUCCESS: gzipped output file since it came in as a compressed file in downsample_single_end_file')
                     remove_nonsense_files()
                     logging.debug('SUCCESS: removed excess files created in down_sample_single_end_file')
@@ -503,7 +503,7 @@ if args.Read2 == None:
             if args.subsample == None:
                 no_downsample_single_end_file(R1_dict)
                 if args.Read1[0].endswith('.gz'):
-                    gzip_output_file(f'non_down_sampled_single_end', f'non_down_sampled_{args.Read1[0]}.gz')
+                    gzip_output_file(f'non_down_sampled_single_end', f'non_down_sampled_{args.Read1[0]}')
                     logging.debug('SUCCESS: gzipped output file since it came in as a compressed file in no_downsample_single_end_file')
                     remove_nonsense_files()
                     logging.debug('SUCCESS: removed excess files created in no_down_sample_single_end_file')
