@@ -346,7 +346,7 @@ parser.add_argument('-o', '--output',
 parser.add_argument('-c', '--compress',
     choices = ['yes', 'YES', 'Yes', 'yES', 'no', 'NO', 'No', 'nO'],
     default = 'no',
-    help = "Compress fastq file into fastq.gz file on output. I.E. --c no"
+    help = "Compress fastq file into fastq.gz file on output. Common typing mistakes are included. I.E. --c no"
     )
 
 
