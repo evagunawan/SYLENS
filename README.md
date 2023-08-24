@@ -78,7 +78,7 @@ Sylens.py FILE1.fastq FILE2.fastq -s 1000 -c yes --seed 1691696502 -f fastq-sole
 
 ### **Legend**
 
-![legend_Sylens](https://github.com/evagunawan/SYLENS/assets/124393795/d8fb7491-d199-4303-b820-64095f70ac51)
+![legend_Sylens](https://github.com/evagunawan/SYLENS/assets/124393795/675eeafb-8441-400f-bc22-d05a2d688ddf)
 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
