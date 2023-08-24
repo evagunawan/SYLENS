@@ -290,8 +290,8 @@ paired_end_2 = []
 # Downsampler program description 
 parser = argparse.ArgumentParser( 
     prog = 'Subsampler for FASTQ file(s)',
-    description = 'Enter in FASTQ file(s) and down sample based on a user supplied integer. If no user input is added the entire file is sampled and output as chosen filetype. If .gz files are entered, they will be compressed on output.',
-    epilog = "This is supposed to show the epilog at the bottom of help, but I don't know how to write an epilog, haha"
+    description = 'Enter in FASTQ file(s) and down sample based on a user supplied integer. If no user input is added the entire file is sampled and output as chosen filetype.',
+    epilog = "If .gz files are entered, they will be automatically compressed on output."
     )
 
 
@@ -299,7 +299,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     'Read1', 
     nargs = 1,
-    help = 'Add FASTQ file here. I.E. filename.fastq or R1.fastq'
+    help = 'Add R1/Single-end/Interleaved FASTQ file here. I.E. filename.fastq'
     )
 
 
@@ -307,14 +307,14 @@ parser.add_argument(
 parser.add_argument(
     'Read2', 
     nargs = '?',
-    help = 'Add second FASTQ file here if paired-end. I.E. R2.fastq'
+    help = 'Add additional FASTQ file here if paired-end. I.E. R2.fastq'
     )
 
 
 # Creating input which allows the user to input an integer for # of samples to downsample to 
 parser.add_argument('-s','--subsample', 
     type = int,
-    help = 'Enter an integer which will be the total number of down sampling of FASTQ files occuring. I.E. -s 10000. Leave blank if no subsampling needs to occur and only file converion needs to occur.'
+    help = 'Enter an integer which will be the total number of down sampling of FASTQ files occuring. Leave blank if no subsampling is desired and file conversion is needed. I.E. -s 10000.'
     )
 
 
