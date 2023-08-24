@@ -479,7 +479,7 @@ if args.Read2 == None:
             if args.subsample == None:
                 no_downsample_interleaved_file(R1_dict)
                 if args.Read1[0].endswith('.gz'):
-                    gzip_output_file('non_down_sampled_interleaved', f'non_down_sampled_{args.Read1[0]}.gz')
+                    gzip_output_file('non_down_sampled_interleaved', f'non_down_sampled_{args.Read1[0]}')
                     logging.debug('SUCCESS: gzipped output file since it came in as a compressed file in non_down_sample_interleaved_file')
                 else:
                     compress('non_down_sampled_interleaved', f'non_down_sampled_{args.Read1[0]}')
