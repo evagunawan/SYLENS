@@ -322,7 +322,7 @@ parser.add_argument('-s','--subsample',
 parser.add_argument('-f', '--filetype',
     choices = ['fastq', 'fastq-solexa'],
     default = 'fastq',
-    help = "Add what type of fastq file is being input. fastq/fastq-sanger-> uses ASCII offset of 33 whereas fastq-solexa-> uses ASCII of 64. I.E fastq-solexa"
+    help = "Add what type of fastq file is being input. fastq/fastq-sanger-> uses ASCII offset of 33 whereas fastq-solexa-> uses ASCII of 64. I.E -f fastq-solexa"
     )
 
 
