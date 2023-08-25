@@ -1,5 +1,8 @@
+*.bam
+*.sam
 *.fasta
 *.fastq
 *.gz
+*.sth
 old/
 test_1.py

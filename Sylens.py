@@ -632,7 +632,7 @@ if args.Read2 != None:
                             compress('down_sampled_R1', f'down_sampled_{args.Read1[0]}')
                             logging.debug('SUCCESS: finished compress function for R1 from downsample_paired_end_files')
                         if args.Read2.endswith('.gz'):
-                            gzip_output_file(f'down_sampled_R2', f'down_sampled_{args.Read2}')
+                            gzip_output_file('down_sampled_R2', f'down_sampled_{args.Read2}')
                             logging.debug('SUCCESS: made dictionary for subsampled zipped R2 file in downsample_paired_end_files')
                             remove_nonsense_files()
                             logging.debug('SUCCESS: removed excess files for R2 created in downsample_paired_end_files')
@@ -649,7 +649,7 @@ if args.Read2 != None:
                             compress('non_down_sampled_R1', f'non_down_sampled_{args.Read1[0]}')
                             logging.debug('SUCCESS: finished compress function for R1 from non_downsample_paired_end_files')
                         if args.Read2.endswith('.gz'):
-                            gzip_output_file(f'non_down_sampled_R2', f'non_down_sampled_{args.Read2}')
+                            gzip_output_file('non_down_sampled_R2', f'non_down_sampled_{args.Read2}')
                             logging.debug('SUCCESS: removed excess files for R2 created in non_downsample_paired_end_files')
                             remove_nonsense_files()
                         else:
