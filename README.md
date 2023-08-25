@@ -1,5 +1,4 @@
 # SYLENS
-![text-1692889436721](https://github.com/evagunawan/SYLENS/assets/124393795/4ae4bf26-1471-40b5-b53d-02358534bbb1)
 
 **S**ampling **Y**ielding **LE**ss **N**oticeable **S**amples
 
@@ -74,11 +73,10 @@ Sylens.py FILE1.fastq FILE2.fastq -s 1000 -c yes --seed 1691696502 -f fastq-sole
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## **PROGRAM OUTLINE**
 
-![Program_Map](https://github.com/evagunawan/SYLENS/assets/124393795/4f3995f0-3d2f-404f-9d03-9cb80d6defff)
+
 
 ### **Legend**
 
-![legend_Sylens](https://github.com/evagunawan/SYLENS/assets/124393795/675eeafb-8441-400f-bc22-d05a2d688ddf)
 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
