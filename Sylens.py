@@ -291,7 +291,7 @@ paired_end_2 = []
 parser = argparse.ArgumentParser( 
     prog = 'Subsampler for FASTQ file(s)',
     description = 'Enter in FASTQ file(s) and down sample based on a user supplied integer. If no user input is added the entire file is sampled and output as chosen filetype.',
-    epilog = "Additional information, including a README.md, can be found at https://github.com/evagunawan/SYLENS/tree/main"
+    epilog = "Additional information and a README.md can be found at https://github.com/evagunawan/SYLENS/tree/main"
     )
 
 
