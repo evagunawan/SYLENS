@@ -24,16 +24,21 @@ Authors
 
 ## **USAGE**
 
-Sylens requiers **Python 3.8.10** or greater to use.
+Sylens requiers **Python 3.8.10** or greater to use. Decompressed and compressed paired-end, single-end, and interleaved files are all file types that can be analyzed with Sylens. 
 
-This program takes in 'fastq-sanger' or 'fastq-solexa' files. To begin the pipeline with a paired-end file use:
+To begin Sylens with a paired-end file use:
 ```
 Sylens.py FILE1.fastq FILE2.fastq
 ```
 
-To begin the pipeline with a single-end or interleaved file, use:
+To begin with a single-end or interleaved file, use:
 ```
 Sylens.py INTERLEAVED.fastq
+```
+
+File input type by default is fastq. However, if the input file format is not fastq, use the flag `-f` or `--filetype` with the input file's correct formatting. Currently Sylens supports fastq-sanger, also known as fastq format (ASCII 33), and fastq-solexa (ASCII 64).
+```
+Sylens.py FILE1.fastq -f fastq-solexa
 ```
 
 Subsampling with Sylens is done through the `-s` or `--subsample` flag with the integer you want to down sample to.
@@ -41,24 +46,19 @@ Subsampling with Sylens is done through the `-s` or `--subsample` flag with the 
 Sylens.py FILE1.fastq -s 1000
 ```
 
-Compressing or not compressing a file on output is done by using the `-c` or `--compress`flag with yes or no attached. If a .gz file is input, the output will be .gz.
+Compressing or not compressing a file on output is done by using the `-c` or `--compress` flag with yes or no attached. If a .gz file is input, the output will be .gz. By default, no compression occurs on output.
 ```
 Sylens.py FILE1.fastq -c yes
 ```
 
-By default, files output by Sylens are in fastq format. Changing file formats is done by adding the `-o` or `--output` flag with the output file type you would like to convert to.
+By default, files output by Sylens are in fastq format. Changing output file formats is done by adding the `-o` or `--output` flag with the output file type you would like to convert to.
 ```
 Sylens.py FILE1.fastq -o fastq-solexa
 ```
 
-File input type by default is fastq. If the input file format is not fastq, use the flag `-f` or `--filetype` with the input file's correct formatting.
+For reproducibility, Sylens provides a seed number. To denote a seed generated from a previous run, use the `--seed` flag with the seed number.
 ```
-Sylens.py FILE1.fastq -f fastq-solexa
-```
-
-For reproducibility, Sylens provides a seed number. To denote a seed generated from a previous run use the `--seed` flag with the seed number.
-```
-Sylens.py FILE1.fastq -s 1691696502
+Sylens.py FILE1.fastq --seed 1691696502
 ```
 
 If any additional explanations are needed, use the `-h` or `--help` flag.
@@ -68,7 +68,7 @@ Sylens.py FILE1.fastq --help
 
 Multiple flags can be utilized in one line of code, if desired.
 ```
-Sylens.py FILE1.fastq FILE2.fastq -s 1000 -c yes --seed 1691696502 -f fastq-solexa -o fastq-solexa
+Sylens.py FILE1.fastq FILE2.fastq -s 1000 -c yes --seed 1691696502 -f fastq-solexa -o fastq
 ```
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
