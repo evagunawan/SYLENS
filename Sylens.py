@@ -291,7 +291,7 @@ paired_end_2 = []
 parser = argparse.ArgumentParser( 
     prog = 'Subsampler for FASTQ file(s)',
     description = 'Enter in FASTQ file(s) and down sample based on a user supplied integer. If no user input is added the entire file is sampled and output as chosen filetype.',
-    epilog = "If .gz files are entered, they will be automatically compressed on output."
+    epilog = "Additional information, including a README.md, can be found at https://github.com/evagunawan/SYLENS/tree/main"
     )
 
 
@@ -314,7 +314,7 @@ parser.add_argument(
 # Creating input which allows the user to input an integer for # of samples to downsample to 
 parser.add_argument('-s','--subsample', 
     type = int,
-    help = 'Enter an integer which will be the total number of down sampling of FASTQ files occuring. Leave blank if no subsampling is desired and file conversion is needed. I.E. -s 10000.'
+    help = 'Enter an integer which will be the total number of down sampling of FASTQ files occuring. Leave blank if no subsampling is desired and file conversion is needed. I.E. --subsample 10000.'
     )
 
 
@@ -338,7 +338,7 @@ parser.add_argument('--seed',
 parser.add_argument('-o', '--output',
     choices = ['fastq', 'fastq-solexa'],
     default = 'fastq',
-    help = "Add what type of fastq file is desired at output. I.E fastq-solexa"
+    help = "Add what type of fastq file is desired at output. I.E --output fastq-solexa"
     )
 
 
@@ -346,7 +346,7 @@ parser.add_argument('-o', '--output',
 parser.add_argument('-c', '--compress',
     choices = ['yes', 'YES', 'Yes', 'yES', 'no', 'NO', 'No', 'nO'],
     default = 'no',
-    help = "Compress fastq file into fastq.gz file on output. Common typing mistakes are included. I.E. --c no"
+    help = "Compress fastq file into fastq.gz file on output. Common typing mistakes are included. I.E. -c no"
     )
 
 
