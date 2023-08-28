@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 '''
+TODO Think about how to do the other single end and interleaved etc. 
 TODO Far future: Maybe add sam/bam file
+TODO Not care about switching r1 and r2
 IN_PROCESS Learn about exceptions
 DONE? Logging library https://docs.python.org/3/library/logging.html#logging-levels
 '''
@@ -18,80 +20,180 @@ import shutil
 import os
 import logging
 
-from zipfile import ZipFile
 from Bio import SeqIO
+from singleEndProcess import singleEndProcess
+from interleavedProcess import interleavedProcess
+# from pairedEndProcess import pairedEndProcess
 
-############################################### Creating parser ###############################################
+# Creating class that displays help if no information is entered in parser
+class DownsamplerParser(argparse.ArgumentParser):
+    def error(self, message):
+        self.print_help()
+        sys.stderr.write(f'\nERROR: {message}\n')
+        sys.exit(1)
+
 # Downsampler program description 
-parser = argparse.ArgumentParser( 
+parser = DownsamplerParser( 
     prog = 'Subsampler for FASTQ file(s)',
     description = 'Enter in FASTQ file(s) and down sample based on a user supplied integer. If no user input is added the entire file is sampled and output as chosen filetype.',
-    epilog = "Additional information and a README.md can be found at #### NEED TO REPLACE LINK ONCE PUBLISH ####"
+    epilog = "Additional information and a README.md can be found at https://github.com/evagunawan/SYLENS"
     )
-
-
-# Creating a function which takes in a filename.fastq or R1.fastq. The number of arguments needed here is 1
-parser.add_argument(
-    'Read1', 
-    nargs = 1,
+parser.add_argument('Read1', 
     help = 'Add R1/Single-end/Interleaved FASTQ file here. I.E. filename.fastq'
     )
-
-
-# Creating optional argument which can be R2.fastq for situations where separate paired-end files are. The number of arguments here can be 0 or more
-parser.add_argument(
-    'Read2', 
+parser.add_argument('Read2', 
     nargs = '?',
     help = 'Add additional FASTQ file here if paired-end. I.E. R2.fastq'
     )
-
-
-# Creating input which allows the user to input an integer for # of samples to downsample to 
 parser.add_argument('-s','--subsample', 
     type = int,
     help = 'Enter an integer which will be the total number of down sampling of FASTQ files occuring. Leave blank if no subsampling is desired and file conversion is needed. I.E. --subsample 10000.'
     )
-
-
-# Creating argument to denote what type of fastq file is being looked at
 parser.add_argument('-f', '--filetype',
     choices = ['fastq', 'fastq-solexa'],
     default = 'fastq',
     help = "Add what type of fastq file is being input. fastq/fastq-sanger-> uses ASCII offset of 33 whereas fastq-solexa-> uses ASCII of 64. I.E -f fastq-solexa"
     )
-
-
-# Creating part of the argument which allows the user to input an int for subsampling 
 parser.add_argument('--seed', 
     type = int,
     default = int(time.time()),
     help = 'Enter the seed number if you would like to reproduce previous results. I.E. --seed 1691696502'
     )
-
-
-# Creating argument to denote what type of fastq file is wanted during output
 parser.add_argument('-o', '--output',
     choices = ['fastq', 'fastq-solexa'],
     default = 'fastq',
     help = "Add what type of fastq file is desired at output. I.E --output fastq-solexa"
     )
-
-
-# Creating argument to denote what type of fastq file is wanted during output
 parser.add_argument('-c', '--compress',
-    choices = ['yes', 'YES', 'Yes', 'yES', 'no', 'NO', 'No', 'nO'],
-    default = 'no',
+    default = False,
+    action = 'store_true',
     help = "Compress fastq file into fastq.gz file on output. Common typing mistakes are included. I.E. -c no"
     )
-
 
 #Runs the parser and allows you to call arguments downstream
 args = parser.parse_args()
 
-
+#Format for logging debug-critical information
 logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
 
+'''
+Set seed value to time since epoch that way each time program is run, 
+seed value is different. If user enters seed value, program will 
+reproduce the same results 
+'''
+random.seed(args.seed)
 
+class ReadingFile:
+
+    def __init__(self, gzip, filetype):
+        
+        #This is getting the path and filetype
+        self.gzip = gzip
+        self.filetype = filetype
+
+        #This checks if compressed
+        if self.gzip.endswith('.gz'):
+            self.gzip = True
+            logging.debug('Ended with .gz')
+        
+        else:
+            self.gzip = False
+            logging.debug('No .gz')
+        
+        #This will read the data from the file into memory instead of creating a new file
+        if self.gzip == True:
+            with gzip.open(self.path, 'rt') as infile:
+                self.reads = SeqIO.to_dict(SeqIO.parse(infile, self.filetype))
+                logging.debug('created dictionary for .gz')
+   
+        else:
+            with open(self.gzip, 'rt') as infile:
+                self.reads = SeqIO.to_dict(SeqIO.parse(infile, self.filetype))
+                logging.debug('created dictionary for not .gz')
+        
+        #Looks at the first and last reads of the file
+        first_read = list(self.reads)[0]
+        last_read = list(self.reads)[-1]
+        logging.debug(f'First read {first_read} and last read {last_read} obtained.')
+
+
+        #Determines whether single file is single or interleaved
+        if args.Read2 == None:
+            if re.search(r"(^\w+.)(\w+)(.)(1$)", first_read) and re.search(r"(^\w+.)(\w+)(.)(1$)", last_read):
+                self.singleEnd = True
+                self.interleaved = False
+                self.pairedEnd = False
+                logging.debug('Determined that it was a single end file')
+
+            if re.search(r"(^\w+.)(\w+)(.)(1$)", first_read) and re.search(r"(^\w+.)(\w+)(.)(2$)", last_read):
+                self.singleEnd = False
+                self.interleaved = True
+                self.pairedEnd = False
+                logging.debug('DEtermined that it was an interleaved file')
+
+        #Determines if paired end
+        if args.Read1 != None:
+            if re.search(r"(^\w+.)(\w+)(.)(2$)", first_read) and re.search(r"(^\w+.)(\w+)(.)(2$)", last_read):
+                self.singleEnd = False
+                self.interleaved = False
+                self.pairedEnd = True
+                logging.debug('Determined that it was a paired end file')
+
+        
+    #Analyses one file
+    def analysis_of_single_file(self):
+        if args.Read2 == None:
+
+            #if single end sends to single end script
+            if self.singleEnd == True:
+                singleEndProcess(self)
+
+            #if interleaved sends to interleaved script
+            if self.interleaved == True:
+                interleavedProcess(self)
+
+        #if paired end, sends to paired end script
+        if args.Read2 != None:
+            if self.pairedEnd == True:
+                print('ignore for now')
+                # pairedEndProcess(self)
+
+
+#Sends read 1 through reading file argument
+read1 = ReadingFile(args.Read1, args.filetype)
+
+if args.Read2 != None:
+    read2 = ReadingFile(args.Read2, args.filetype)
+
+if args.Read2 == None:
+    read1.analysis_of_single_file()
+
+
+# if args.Read2:
+#     read2 = ReadingFile(args.Read2, args.filetype)
+#     print('True')
+
+# if not args.Read2 and not args.interleaved:
+#     read1.singleEnd = True
+#     print('TRue')
+
+
+# if args.Read2:
+#     read2 = ReadingFile(args.Read2, args.filetype, args.subsample)
+
+sys.exit()
+
+### Defining a few empty lists ###
+subsample_max_IDs = []
+subsample_max_IDs_2 = []
+interleaved_R1_IDs = []
+interleaved_R2_IDs = []
+r1_IDS = []
+r2_IDS = []
+r1_split_ids = []
+r2_split_ids = []
+paired_end_1 = []
+paired_end_2 = []
 
 ############################################### Creating a bunch of custom functions for single/paired/interleaved interpretation, zipping, etc. ###############################################
 
@@ -112,7 +214,8 @@ def single_end_file(dictionary_name, subsample_max):
         logging.info("Downsampling occuring.")
         Random_IDs = random.sample(list(dictionary_name), subsample_max)
         single_file_output = [dictionary_name[info] for info in Random_IDs]
-        logging.info('Writing to file...')
+        logging.info('Writing to file...')    
+        
         if args.Read1[0].endswith('.gz'):
             with gzip.open(f"down_sampled_single_end_{args.Read1[0]}", 'w') as IDs_Seq_File:
                 SeqIO.write(single_file_output, IDs_Seq_File, args.output)
@@ -123,16 +226,20 @@ def single_end_file(dictionary_name, subsample_max):
             if args.compress == 'yes' or args.compress == 'YES' or args.compress == 'Yes' or args.compress == 'yES': 
                 with gzip.open(f"down_sampled_single_end_{args.Read1[0]}", 'w') as IDs_Seq_File:
                     SeqIO.write(single_file_output, IDs_Seq_File, args.output)
+        
         logging.info(f"Done writing to: down_sampled_single_end_{args.Read1[0]}")
-        logging.debug(f'SUCCESS: finished down_sampled_single_end_{args.Read1[0]}')
+        logging.debug(f'SUCCESS: finished down_sampled_single_end_{args.Read1[0]}')   
+    
     if args.subsample == None:
         logging.info("No downsampling occurring.")
         All_IDs = list(dictionary_name)
         All_output = [dictionary_name[info] for info in All_IDs]
         logging.info('Writing to file...')
+        
         if args.Read1[0].endswith('.gz'):
             with gzip.open(f"non_down_sampled_single_end_{args.Read1[0]}", 'wb') as IDs_Seq_File:
                 SeqIO.write(All_output, IDs_Seq_File, args.output)
+        
         else:
             if args.compress == 'no' or args.compress == 'NO' or args.compress == 'No' or args.compress == 'nO':
                 with open(f"non_down_sampled_single_end_{args.Read1[0]}", 'w') as IDs_Seq_File:
@@ -140,6 +247,7 @@ def single_end_file(dictionary_name, subsample_max):
             if args.compress == 'yes' or args.compress == 'YES' or args.compress == 'Yes' or args.compress == 'yES': 
                 with gzip.open(f"non_down_sampled_single_end_{args.Read1[0]}", 'wb') as IDs_Seq_File:
                     SeqIO.write(All_output, IDs_Seq_File, args.output)
+        
         logging.info(f"Done writing to: non_down_sampled_single_end_{args.Read1[0]}")
         logging.debug(f'SUCCESS: finished non_downsample_single_end_{args.Read1[0]}')
 
@@ -168,6 +276,7 @@ def interleaved_file(dictionary_name, subsample_max):
         count = 1
         R1_count = 0
         R2_count = 0
+        
         if args.Read1[0].endswith('.gz'):
             with gzip.open(f"down_sampled_interleaved_{args.Read1[0]}", 'w') as IDs_Seq_File:
                 while count < (1 + 2*len(output_1)):
@@ -180,6 +289,7 @@ def interleaved_file(dictionary_name, subsample_max):
                             count+= 1
                             SeqIO.write(output_2[R2_count], IDs_Seq_File, args.output)
                             R2_count += 1
+        
         else:
             if args.compress == 'no' or args.compress == 'NO' or args.compress == 'No' or args.compress == 'nO':
                 with open(f"down_sampled_interleaved_{args.Read1[0]}", 'w') as IDs_Seq_File:
@@ -193,6 +303,7 @@ def interleaved_file(dictionary_name, subsample_max):
                                 count+= 1
                                 SeqIO.write(output_2[R2_count], IDs_Seq_File, args.output)
                                 R2_count += 1
+            
             if args.compress == 'yes' or args.compress == 'YES' or args.compress == 'Yes' or args.compress == 'yES': 
                 with gzip.open(f"down_sampled_interleaved_{args.Read1[0]}", 'w') as IDs_Seq_File:
                     while count < (1 + 2*len(output_1)):
@@ -205,6 +316,7 @@ def interleaved_file(dictionary_name, subsample_max):
                                 count+= 1
                                 SeqIO.write(output_2[R2_count], IDs_Seq_File, args.output)
                                 R2_count += 1
+        
         logging.info(f'Done writing to: down_sampled_interleaved_{args.Read1[0]}')
         logging.debug(f'SUCCESS: finished down_sample_interleaved_{args.Read1[0]}')
     
@@ -222,6 +334,7 @@ def interleaved_file(dictionary_name, subsample_max):
         count = 1
         R1_count = 0
         R2_count = 0
+        
         if args.Read1[0].endswith('.gz'):
             with gzip.open(f"non_down_sampled_interleaved_{args.Read1[0]}", 'w') as IDs_Seq_File:
                 while count < (1 + 2*len(output_1)):
@@ -234,6 +347,7 @@ def interleaved_file(dictionary_name, subsample_max):
                             count+= 1
                             SeqIO.write(output_2[R2_count], IDs_Seq_File, args.output)
                             R2_count += 1
+        
         else:
             if args.compress == 'no' or args.compress == 'NO' or args.compress == 'No' or args.compress == 'nO':
                 with open(f"non_down_sampled_interleaved_{args.Read1[0]}", 'w') as IDs_Seq_File:
@@ -247,6 +361,7 @@ def interleaved_file(dictionary_name, subsample_max):
                                 count+= 1
                                 SeqIO.write(output_2[R2_count], IDs_Seq_File, args.output)
                                 R2_count += 1
+            
             if args.compress == 'yes' or args.compress == 'YES' or args.compress == 'Yes' or args.compress == 'yES': 
                 with open(f"non_down_sampled_interleaved_{args.Read1[0]}", 'w') as IDs_Seq_File:
                     while count < (1 + 2*len(output_1)):
@@ -259,6 +374,7 @@ def interleaved_file(dictionary_name, subsample_max):
                                 count+= 1
                                 SeqIO.write(output_2[R2_count], IDs_Seq_File, args.output)
                                 R2_count += 1
+        
         logging.info("Done writing to: non_down_sampled_interleaved")
         logging.debug('SUCCESS: finished no_downsample_interleaved_file')
 
@@ -465,25 +581,7 @@ def gzip_output_file(original_file, new_output_file):
             logging.debug(f'SUCCESS: finished gzip {new_output_file}')
 
 
-### Defining a few empty lists ###
-subsample_max_IDs = []
-subsample_max_IDs_2 = []
-interleaved_R1_IDs = []
-interleaved_R2_IDs = []
-r1_IDS = []
-r2_IDS = []
-r1_split_ids = []
-r2_split_ids = []
-paired_end_1 = []
-paired_end_2 = []
 
-
-'''
-Set seed value to time since epoch that way each time program is run, 
-seed value is different. If user enters seed value, program will 
-reproduce the same results 
-'''
-random.seed(args.seed)
 
 
 ''' 
