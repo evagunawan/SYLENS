@@ -23,7 +23,7 @@ import logging
 from Bio import SeqIO
 from singleEndProcess import singleEndProcess
 from interleavedProcess import interleavedProcess
-# from pairedEndProcess import pairedEndProcess
+from pairedEndProcess import pairedEndProcess
 
 # Creating class that displays help if no information is entered in parser
 class DownsamplerParser(argparse.ArgumentParser):
@@ -74,7 +74,7 @@ parser.add_argument('-c', '--compress',
 args = parser.parse_args()
 
 #Format for logging debug-critical information
-logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
+logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
 
 '''
 Set seed value to time since epoch that way each time program is run, 
@@ -85,29 +85,29 @@ random.seed(args.seed)
 
 class ReadingFile:
 
-    def __init__(self, gzip, filetype):
+    def __init__(self, path, filetype):
         
         #This is getting the path and filetype
-        self.gzip = gzip
+        self.path = path
         self.filetype = filetype
 
         #This checks if compressed
-        if self.gzip.endswith('.gz'):
-            self.gzip = True
+        if self.path.endswith('.gz'):
+            gzipped = True
             logging.debug('Ended with .gz')
         
         else:
-            self.gzip = False
+            gzipped = False
             logging.debug('No .gz')
         
         #This will read the data from the file into memory instead of creating a new file
-        if self.gzip == True:
+        if gzipped == True:
             with gzip.open(self.path, 'rt') as infile:
                 self.reads = SeqIO.to_dict(SeqIO.parse(infile, self.filetype))
                 logging.debug('created dictionary for .gz')
    
         else:
-            with open(self.gzip, 'rt') as infile:
+            with open(self.path, 'rt') as infile:
                 self.reads = SeqIO.to_dict(SeqIO.parse(infile, self.filetype))
                 logging.debug('created dictionary for not .gz')
         
@@ -121,42 +121,45 @@ class ReadingFile:
         if args.Read2 == None:
             if re.search(r"(^\w+.)(\w+)(.)(1$)", first_read) and re.search(r"(^\w+.)(\w+)(.)(1$)", last_read):
                 self.singleEnd = True
-                self.interleaved = False
-                self.pairedEnd = False
+                # self.interleaved = False
+                # self.pairedEnd = False
                 logging.debug('Determined that it was a single end file')
 
             if re.search(r"(^\w+.)(\w+)(.)(1$)", first_read) and re.search(r"(^\w+.)(\w+)(.)(2$)", last_read):
-                self.singleEnd = False
+                # self.singleEnd = False
                 self.interleaved = True
-                self.pairedEnd = False
-                logging.debug('DEtermined that it was an interleaved file')
+                # self.pairedEnd = False
+                logging.debug('Determined that it was an interleaved file')
 
         #Determines if paired end
         if args.Read1 != None:
             if re.search(r"(^\w+.)(\w+)(.)(2$)", first_read) and re.search(r"(^\w+.)(\w+)(.)(2$)", last_read):
-                self.singleEnd = False
-                self.interleaved = False
+                # self.singleEnd = False
+                # self.interleaved = False
                 self.pairedEnd = True
                 logging.debug('Determined that it was a paired end file')
 
         
     #Analyses one file
     def analysis_of_single_file(self):
+        logging.debug('Currently in analysis of single file route')
         if args.Read2 == None:
 
             #if single end sends to single end script
             if self.singleEnd == True:
+                print('single end')
                 singleEndProcess(self)
 
             #if interleaved sends to interleaved script
             if self.interleaved == True:
+                print('interleaved')
                 interleavedProcess(self)
 
         #if paired end, sends to paired end script
         if args.Read2 != None:
             if self.pairedEnd == True:
                 print('ignore for now')
-                # pairedEndProcess(self)
+                pairedEndProcess(self)
 
 
 #Sends read 1 through reading file argument
@@ -167,19 +170,6 @@ if args.Read2 != None:
 
 if args.Read2 == None:
     read1.analysis_of_single_file()
-
-
-# if args.Read2:
-#     read2 = ReadingFile(args.Read2, args.filetype)
-#     print('True')
-
-# if not args.Read2 and not args.interleaved:
-#     read1.singleEnd = True
-#     print('TRue')
-
-
-# if args.Read2:
-#     read2 = ReadingFile(args.Read2, args.filetype, args.subsample)
 
 sys.exit()
 
