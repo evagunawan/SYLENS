@@ -1,5 +1,3 @@
-*.bam
-*.sam
 *.fasta
 *.fastq
 *.gz
