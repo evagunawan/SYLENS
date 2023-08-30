@@ -71,7 +71,7 @@ parser.add_argument('-c', '--compress',
 args = parser.parse_args()
 
 #Format for logging debug-critical information
-logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
+logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
 
 '''
 Set seed value to time since epoch that way each time program is run, 
@@ -82,8 +82,14 @@ random.seed(args.seed)
 
 print(args.Read1, args.Read2, args.subsample, args.filetype, args.seed, args.output, args.compress)
 
+#import function that reads file 
+from read_fastq_file import reading_fastq_file
 
+print(reading_fastq_file(args.Read1, args.filetype))
 
+# from read_fastq_file import verifying_file_type
+
+# verifying_file_type(args.Read1, args.Read2)
 
 
 # if args.Read1 == True:
