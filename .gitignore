@@ -1,6 +1,15 @@
+<<<<<<< HEAD
+=======
+shapes.py
+singular_input.py
+Sylens_classes.py
+Sylens.py
+DualInpust.py
+subsampled_max.py
 __pycache__
 *.bam
 *.sam
+>>>>>>> 0b1c83a50b4fc2b22a31418278c6a80bdb8f7eac
 *.fasta
 *.fastq
 *.gz
