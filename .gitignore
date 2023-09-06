@@ -1,5 +1,11 @@
 <<<<<<< HEAD
 =======
+shapes.py
+singular_input.py
+Sylens_classes.py
+Sylens.py
+DualInpust.py
+subsampled_max.py
 __pycache__
 *.bam
 *.sam
