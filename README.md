@@ -45,9 +45,9 @@ Subsampling with Sylens is done through the `-s` or `--subsample` flag with the 
 Sylens.py FILE1.fastq -s 1000
 ```
 
-Compressing or not compressing a file on output is done by using the `-c` or `--compress` flag with yes or no attached. If a .gz file is input, the output will be .gz. By default, no compression occurs on output.
+Compressing or not compressing a file on output is done by using the `-c` flag. If a .gz file is input, the output will be .gz. By default, no compression occurs on output.
 ```
-Sylens.py FILE1.fastq -c yes
+Sylens.py FILE1.fastq -c
 ```
 
 By default, files output by Sylens are in fastq format. Changing output file formats is done by adding the `-o` or `--output` flag with the output file type you would like to convert to.
@@ -67,7 +67,7 @@ Sylens.py FILE1.fastq --help
 
 Multiple flags can be utilized in one line of code, if desired.
 ```
-Sylens.py FILE1.fastq FILE2.fastq -s 1000 -c yes --seed 1691696502 -f fastq-solexa -o fastq
+Sylens.py FILE1.fastq FILE2.fastq -s 1000 -c --seed 1691696502 -f fastq-solexa -o fastq
 ```
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
