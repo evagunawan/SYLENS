@@ -67,7 +67,7 @@ Sylens.py FILE1.fastq --help
 
 Multiple flags can be utilized in one line of code, if desired.
 ```
-Sylens.py FILE1.fastq FILE2.fastq -s 1000 -c yes --seed 1691696502 -f fastq-solexa -o fastq
+Sylens.py FILE1.fastq FILE2.fastq -s 1000 -c --seed 1691696502 -f fastq-solexa -o fastq
 ```
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
