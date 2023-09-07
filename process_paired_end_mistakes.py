@@ -4,6 +4,8 @@ import sys
 
 def process_mistakes(firstR1, lastR1, firstR2, lastR2):
 
+    logging.info('Checking for common errors.')
+
     #Errors if wrong files are supplied
     if firstR1.endswith('1') and lastR1.endswith('2'):
 

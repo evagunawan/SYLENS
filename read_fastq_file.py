@@ -49,7 +49,9 @@ class FastqFile:
         logging.debug('Entered into reading_fastq')
 
         if self.path2 == None:
-            
+
+            logging.info('Beginning to process file.')
+
             fastqDictionary1 = create_dictionary(self.path1, self.filetype)
             
             first_ID_1 = list(fastqDictionary1) [0]
@@ -61,7 +63,9 @@ class FastqFile:
             logging.debug(f'{first_ID_1} {last_ID_1}')
         
         else:
-            
+
+            logging.info('Beginning to process files.')
+
             fastqDictionary1 = create_dictionary(self.path1, self.filetype)
             fastqDictionary2 = create_dictionary(self.path2, self.filetype)
             

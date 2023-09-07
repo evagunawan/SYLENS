@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 import random
+import logging
 
 import read_fastq_file
 from write_output_file import write_output_file
 
 def process_paired_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput, argsCompress):
+
+    logging.info('No errors detected. Analyzing paired end files.')
 
     dictionary_Read1 = read_fastq_file.fastqDictionary1
     dictionary_Read2 = read_fastq_file.fastqDictionary2
