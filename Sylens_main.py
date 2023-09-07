@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 
 '''
-TODO Think about how to do the other single end and interleaved etc. 
 TODO Far future: Maybe add sam/bam file
-TODO Not care about switching r1 and r2
 IN_PROCESS Learn about exceptions
-DONE? Logging library https://docs.python.org/3/library/logging.html#logging-levels
 '''
 
 #SYLENS: Sampling Yielding LEss Noticeable Samples
@@ -18,7 +15,6 @@ import time
 import logging
 
 import read_fastq_file
-
 from read_fastq_file import FastqFile
 from single_end_processing import process_single_end_sampling
 from interleaved_processing import process_interleaved_sampling
@@ -30,7 +26,7 @@ class DownsamplerParser(argparse.ArgumentParser):
     def error(self, message):
 
         self.print_help()
-        sys.stderr.write(f'\nERROR: {message}\n')
+        sys.stderr.write(f'\nERROR DETECTED: {message}\n')
 
         sys.exit(1)
 

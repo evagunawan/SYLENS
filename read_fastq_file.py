@@ -49,7 +49,9 @@ class FastqFile:
         logging.debug('Entered into reading_fastq')
 
         if self.path2 == None:
-            
+
+            logging.info('Beginning to process file.')
+
             fastqDictionary1 = create_dictionary(self.path1, self.filetype)
             
             first_ID_1 = list(fastqDictionary1) [0]
@@ -61,7 +63,9 @@ class FastqFile:
             logging.debug(f'{first_ID_1} {last_ID_1}')
         
         else:
-            
+
+            logging.info('Beginning to process files.')
+
             fastqDictionary1 = create_dictionary(self.path1, self.filetype)
             fastqDictionary2 = create_dictionary(self.path2, self.filetype)
             
@@ -77,9 +81,7 @@ class FastqFile:
 
         print(determine_paired_single_interleaved(first_ID_1, last_ID_1, first_ID_2, last_ID_2))
 
-        fastqReadOutputObject = FastqReadOutput(determined_filetype, format)
-
-        fastqReadOutputObject.output()
+        logging.info('The format is: ' + format)
 
 #Determining format of fastq file to properly figure out if R1 and/or R2
 def determine_fastq_ID_formatting(ID):
@@ -152,19 +154,3 @@ def determine_paired_single_interleaved(firstR1, lastR1, firstR2, lastR2):
                 determined_filetype = 'Paired-end'
 
     return determined_filetype
-
-#Creating class object to return final information 
-class FastqReadOutput:
-
-    def __init__(self, determined_filetype, determined_formatting):
-
-        self.determined_filetype = determined_filetype
-        self.determined_formatting = determined_formatting
-    
-    def output(self):
-        
-        logging.info('The filetype is: ' + self.determined_filetype)
-
-        logging.info('The format is: ' + self.determined_formatting)
-
-        return self.determined_filetype, self.determined_formatting
