@@ -1,4 +1,5 @@
 # SYLENS
+![Sylens Logo](Assets/Sylens_logo.png)
 
 **S**ampling **Y**ielding **LE**ss **N**oticeable **S**amples
 
@@ -23,7 +24,7 @@ Authors
 
 ## **USAGE**
 
-Sylens requiers **Python 3.8.10** or greater to use. Decompressed and compressed paired-end, single-end, and interleaved files are all file types that can be analyzed with Sylens. 
+Sylens requiers **Python 3.8.10** or greater to use. Decompressed and compressed paired-end, single-end, and interleaved fastq files are all file types that can be analyzed with Sylens. 
 
 To begin Sylens with a paired-end file use:
 ```
@@ -40,7 +41,7 @@ File input type by default is fastq. However, if the input file format is not fa
 Sylens.py FILE1.fastq -f fastq-solexa
 ```
 
-Subsampling with Sylens is done through the `-s` or `--subsample` flag with the integer you want to down sample to.
+Subsampling with Sylens is done through the `-s` or `--subsample` flag with the desired integer to down sample to.
 ```
 Sylens.py FILE1.fastq -s 1000
 ```
@@ -72,17 +73,16 @@ Sylens.py FILE1.fastq FILE2.fastq -s 1000 -c --seed 1691696502 -f fastq-solexa -
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## **PROGRAM OUTLINE**
-
+![Sylens Logo](Assets/Program_Map.PNG)
 
 
 ### **Legend**
-
-
+![Sylens Logo](Assets/legend_Sylens.PNG)
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## **OUTPUT**
-Output files by default will be fastq files. If the output filetype indicated is differet than the input format, Bio.SeqIO will write it to the desired output. 
+Output files by default will be fastq files. If the output filetype indicated is differet than the input format, Bio.SeqIO will write it to the desired output.
 
 ## **AUTHORS**
 [Eva Gunawan](https://github.com/evagunawan), Bioinformatics Fellow through APHL
