@@ -14,11 +14,8 @@ import sys
 import time
 import logging
 
-import read_fastq_file
-from read_fastq_file import FastqFile
-from single_end_processing import process_single_end_sampling
-from interleaved_processing import process_interleaved_sampling
-from paired_end_processing import process_paired_end_sampling
+from read_fastq_file import FastqFileData
+
 
 # Creating class that displays help if no information is entered in parser
 class DownsamplerParser(argparse.ArgumentParser):
@@ -85,22 +82,16 @@ logging.info(f"This run's seed number is {args.seed}")
 logging.debug('Starting processing of file(s)')
 
 #Created fastq file object using the parameters specified in secondary script 
-fastq_information_object = FastqFile(args.Read1, args.Read2, args.filetype)
+fastq_data_object = FastqFileData(args.Read1, args.Read2, args.subsample, args.output, args.compress, args.filetype, args.seed)
 
-fastq_information_object.reading_fastq_file()
+#Analyzing fastq_infomration_object
+fastq_data_object.reading_fastq_file()
 
-#Writing output of determined filetype
-if read_fastq_file.determined_filetype == 'Single-end':
+fastq_data_object.determine_fastq_ID_formatting()
 
-    process_single_end_sampling(args.Read1, args.Read2, args.subsample, args.output, args.compress)
+fastq_data_object.determine_paired_single_interleaved()
 
-elif read_fastq_file.determined_filetype == 'Interleaved':
-
-    process_interleaved_sampling(args.Read1, args.subsample, args.output, args.compress)
-
-elif read_fastq_file.determined_filetype == 'Paired-end':
-
-    process_paired_end_sampling(args.Read1, args.Read2, args.subsample, args.output, args.compress)
+fastq_data_object.processing_filetype()
 
 logging.info('Sylens has finished processing files. Closing')
 

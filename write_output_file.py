@@ -16,13 +16,34 @@ def compress_gz(file_name, output_object, argsOutput,):
 
         SeqIO.write(output_object, IDs_Seq_File, argsOutput)
 
-def compress_interleaved(argsOutput, output_1, output_2, input_file_name):
+def compress_interleaved(argsOutput, output_1, output_2, input_file_name, count, R1_count, R2_count):
 
     with gzip.open(f"{input_file_name}", 'wt') as IDs_Seq_File:
 
         logging.debug('Writing to gzipped file.')
 
         #Writing every other entry to output file
+        while count < (1 + 2*len(output_1)):
+
+            if count % 2 != 0 :
+
+                count += 1
+                SeqIO.write(output_1[R1_count], IDs_Seq_File, argsOutput)
+                R1_count += 1
+
+            else:
+
+                if count % 2 == 0:
+
+                    count+= 1
+                    SeqIO.write(output_2[R2_count], IDs_Seq_File, argsOutput)
+                    R2_count += 1
+
+def no_compress_interleaved(argsOutput, output_1, output_2, input_file_name, count, R1_count, R2_count):
+    logging.debug('Writing to file.')
+
+    with open(f'{input_file_name}', 'wt') as IDs_Seq_File:
+
         while count < (1 + 2*len(output_1)):
 
             if count % 2 != 0 :
@@ -47,39 +68,22 @@ def write_interleaved_file(argsRead1, argsOutput, argsCompress, output_1, output
     R1_count = 0
     R2_count = 0
 
-    #Compression desired
+    #Compression desired of interleaved file
     if argsRead1.endswith('.gz'):
 
-        compress_interleaved(argsOutput, output_1, output_2, input_file_name)
+        compress_interleaved(argsOutput, output_1, output_2, input_file_name, count, R1_count, R2_count)
 
+    #No compression desired of interleaved file
     if argsCompress == True and not argsRead1.endswith('.gz'):
         
         input_file_name = input_file_name + '.gz'
 
-        compress_interleaved(argsOutput, output_1, output_2, input_file_name)
+        compress_interleaved(argsOutput, output_1, output_2, input_file_name, count, R1_count, R2_count)
 
     #No compression desired
     if argsCompress != True and not argsRead1.endswith('.gz'):
 
-        with open(f'{input_file_name}', 'wt') as IDs_Seq_File:
-
-            logging.debug('Writing to file.')
-
-            while count < (1 + 2*len(output_1)):
-                    
-                if count % 2 != 0 :
-                    
-                    count += 1
-                    SeqIO.write(output_1[R1_count], IDs_Seq_File, argsOutput)
-                    R1_count += 1
-                    
-                else:
-                    
-                       if count % 2 == 0:
-
-                        count+= 1
-                        SeqIO.write(output_2[R2_count], IDs_Seq_File, argsOutput)
-                        R2_count += 1
+        no_compress_interleaved(argsOutput, output_1, output_2, input_file_name, count, R1_count, R2_count)
 
 def write_output_file(argsRead1, argsRead2, argsCompress, file_name_1, file_name_2, output_1, output_2, argsOutput):
 

@@ -4,26 +4,23 @@ import logging
 import re 
 import random
 
-import read_fastq_file
 from write_output_file import write_interleaved_file
 
-def process_interleaved_sampling(argsRead1, argsSubsample, argsOutput, argsCompress):
+def process_interleaved_sampling(argsRead1, argsSubsample, argsOutput, argsCompress, fastqDictionary1, argsSeed, formatExpression):
 
     logging.info('Starting interleaved processing.')
-
-    dictionary_Read1 = read_fastq_file.fastqDictionary1
 
     read1_list = []
     read2_list = []
 
     #Creating read 1 and read 2 lists to reference
-    for element in list(dictionary_Read1):
+    for element in list(fastqDictionary1):
 
-        if re.search(read_fastq_file.formatExpression, element) and element.endswith('1'):
+        if re.search(formatExpression, element) and element.endswith('1'):
 
             read1_list.append(element)
 
-        if re.search(read_fastq_file.formatExpression, element) and element.endswith('2'):
+        if re.search(formatExpression, element) and element.endswith('2'):
 
             read2_list.append(element)
 
@@ -38,11 +35,11 @@ def process_interleaved_sampling(argsRead1, argsSubsample, argsOutput, argsCompr
         r1_ids, r2_ids = zip(*random_ids)
         
         #Storing subsampled IDs and info from dict into output objects 
-        output_1 = [dictionary_Read1[info] for info in r1_ids]
-        output_2 = [dictionary_Read1[info] for info in r2_ids]  
+        output_1 = [fastqDictionary1[info] for info in r1_ids]
+        output_2 = [fastqDictionary1[info] for info in r2_ids]  
 
         #Creating output file name
-        input_file_name = f'downsampled_{argsRead1}'
+        input_file_name = f'{argsSeed}_downsampled_{argsRead1}'
 
         logging.info('Writing to file...')
 
@@ -51,8 +48,8 @@ def process_interleaved_sampling(argsRead1, argsSubsample, argsOutput, argsCompr
 
         logging.debug('In interleaved without subsampling')
 
-        output_1 = [dictionary_Read1[info] for info in read1_list]
-        output_2 = [dictionary_Read1[info] for info in read2_list]
+        output_1 = [fastqDictionary1[info] for info in read1_list]
+        output_2 = [fastqDictionary1[info] for info in read2_list]
         
         input_file_name = f'non_downsampled_{argsRead1}'
 

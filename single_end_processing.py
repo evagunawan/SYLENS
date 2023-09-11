@@ -3,12 +3,9 @@
 import logging
 import random
 
-import read_fastq_file
 from write_output_file import write_output_file
 
-def process_single_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput, argsCompress):
-
-    dictionary_Read1 = read_fastq_file.fastqDictionary1
+def process_single_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput, argsCompress, fastqDictionary1, argsSeed):
     
     output_object_2 = None
     input_file_name_2 = None
@@ -17,11 +14,11 @@ def process_single_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput,
 
         logging.info('Downsampling beginning...')
         
-        Random_IDs = random.sample(list(dictionary_Read1), argsSubsample)
+        Random_IDs = random.sample(list(fastqDictionary1), argsSubsample)
 
-        output_object_1 = [dictionary_Read1[info] for info in Random_IDs]
+        output_object_1 = [fastqDictionary1[info] for info in Random_IDs]
 
-        input_file_name_1 = f'downsampled_{argsRead1}'
+        input_file_name_1 = f'{argsSeed}_downsampled_{argsRead1}'
 
         logging.info('Writing to file...')
 
@@ -29,9 +26,9 @@ def process_single_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput,
         
         logging.info('No downsampling of single-end file.')
         
-        All_IDs = list(dictionary_Read1)
+        All_IDs = list(fastqDictionary1)
 
-        output_object_1 = [dictionary_Read1[info] for info in All_IDs]
+        output_object_1 = [fastqDictionary1[info] for info in All_IDs]
 
         input_file_name_1 = f'non_downsampled_{argsRead1}'
 
