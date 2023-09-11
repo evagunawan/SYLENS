@@ -5,8 +5,11 @@
 import gzip
 import logging
 import re 
+import sys
 
 from Bio import SeqIO
+
+from alternative_dictionary_processing import process_alternative_dictionary
 from process_paired_end_mistakes import process_mistakes
 from single_end_processing import process_single_end_sampling
 from interleaved_processing import process_interleaved_sampling
@@ -54,7 +57,7 @@ class FastqFileData:
             logging.info('Beginning to process file.')
 
             self.fastqDictionary1 = create_dictionary(self.argsRead1, self.argsFiletype)
-            self.fastqDictionary2 = {0:0, 0:0}
+            self.fastqDictionary2 = {None:None, None:None}
 
             return self.fastqDictionary1, self.fastqDictionary2
 
@@ -76,12 +79,15 @@ class FastqFileData:
         self.first_ID_2 = list(self.fastqDictionary2) [0]
         self.last_ID_2 = list(self.fastqDictionary2) [-1]
 
-        #Taking the 3 known formats and creating regular expressions with them. Stored in a dictinoary 
+        #Taking the top 3 known formats and creating regular expressions to identify IDs. Stored REs in a dictinoary 
         # Illumina and Casava have same format, for now.
         format_dictionary = {
-            '(.+)(\d) [1]' :'IlluminaAndCasava',
-            '(^SRR)(\w+).(\d+).([1])': 'NCBI'
+            '(.+)(\d) (1)' :'IlluminaAndCasava',
+            '(^SRR)(\w+)[.+](\d+)[.+](1)': 'NCBI'
             }
+
+        self.formatExpression = None
+        self.format = None
 
         for pattern in format_dictionary:
 
@@ -93,12 +99,23 @@ class FastqFileData:
 
                 logging.debug(f'Regular expression found fastq ID format is {self.formatExpression}')
 
-        logging.info(f'Fastq Formatting type is: {self.format}')
+        if self.formatExpression == None:
+
+            process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary)
+
+        print(self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2,)
 
         return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
 
     #Figures out if input file is single, paired, or interleaved
     def determine_paired_single_interleaved(self):
+        if self.format == 'IlluminaAndCasava':
+
+            self.formatExpression2 = '(.+)(\d) (2)'
+
+        if self.format == 'NCBI':
+
+            self.formatExpression2 = '(^SRR)(\w+)[.+](\d+)[.+](2)'
 
         if self.argsRead2 == None:
 
@@ -111,34 +128,38 @@ class FastqFileData:
             self.paired_file = True
 
         if self.single_file == True:
-        
-            if str(self.first_ID_1).endswith('1') and str(self.last_ID_1).endswith('2'):
+
+            if re.search(self.formatExpression, self.first_ID_1) and re.search(self.formatExpression2, self.last_ID_1):
 
                 self.determined_filetype = 'Interleaved'
 
                 logging.info('File is an interleaved file.')
 
-            if str(self.first_ID_1).endswith('1') and str(self.last_ID_1).endswith('1'):
+                return self.determined_filetype
+
+            if re.search(self.formatExpression, self.first_ID_1) and re.search(self.formatExpression, self.last_ID_1):
 
                 self.determined_filetype = 'Single-end'
 
                 logging.info('File is a single-end file.')
 
+                return self.determined_filetype
+
         if self.paired_file == True:
 
-            process_mistakes(self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2)
+            process_mistakes(self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.formatExpression, self.formatExpression2)
 
-            if str(self.first_ID_1).endswith('1') and str(self.last_ID_1).endswith('1'):
+            if re.search(self.formatExpression, self.first_ID_1) and re.search(self.formatExpression, self.last_ID_1):
 
                 logging.debug('Forward file is correct.')
 
-                if str(self.first_ID_2).endswith('2') and str(self.last_ID_2).endswith('2'):
+                if re.search(self.formatExpression2, self.first_ID_2) and re.search(self.formatExpression2, self.last_ID_2):
 
                     logging.debug('Reverse file is correct.')
     
                     self.determined_filetype = 'Paired-end'
 
-        return self.determined_filetype
+                    return self.determined_filetype
 
     #Writing output of determined filetype
     def processing_filetype(self):
@@ -149,8 +170,8 @@ class FastqFileData:
 
         elif self.determined_filetype == 'Interleaved':
 
-            process_interleaved_sampling(self.argsRead1, self.argsSubsample, self.argsOutput, self.argsCompress, self.fastqDictionary1, self.argsSeed, self.formatExpression)
+            process_interleaved_sampling(self.argsRead1, self.argsSubsample, self.argsOutput, self.argsCompress, self.fastqDictionary1, self.argsSeed, self.formatExpression, self.formatExpression2)
 
         elif self.determined_filetype == 'Paired-end':
 
-            process_paired_end_sampling(self.argsRead1, self.argsRead2, self.argsSubsample, self.argsOutput, self.argsCompress, self.fastqDictionary1, self.fastqDictionary2, self.formatExpression, self.argsSeed)
+            process_paired_end_sampling(self.argsRead1, self.argsRead2, self.argsSubsample, self.argsOutput, self.argsCompress, self.fastqDictionary1, self.fastqDictionary2, self.formatExpression, self.formatExpression2, self.argsSeed)

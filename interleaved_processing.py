@@ -6,7 +6,7 @@ import random
 
 from write_output_file import write_interleaved_file
 
-def process_interleaved_sampling(argsRead1, argsSubsample, argsOutput, argsCompress, fastqDictionary1, argsSeed, formatExpression):
+def process_interleaved_sampling(argsRead1, argsSubsample, argsOutput, argsCompress, fastqDictionary1, argsSeed, formatExpression, formatExpression2):
 
     logging.info('Starting interleaved processing.')
 
@@ -16,14 +16,15 @@ def process_interleaved_sampling(argsRead1, argsSubsample, argsOutput, argsCompr
     #Creating read 1 and read 2 lists to reference
     for element in list(fastqDictionary1):
 
-        if re.search(formatExpression, element) and element.endswith('1'):
+        if re.search(formatExpression, element):
 
             read1_list.append(element)
 
-        if re.search(formatExpression, element) and element.endswith('2'):
+        if re.search(formatExpression2, element):
 
             read2_list.append(element)
-
+    print(read1_list [0])
+    print(read2_list [0])
     #Subsampling detected
     if argsSubsample != None:
         

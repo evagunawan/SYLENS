@@ -68,7 +68,7 @@ parser.add_argument('-c', '--compress',
 args = parser.parse_args()
 
 #Format for logging debug-critical information
-logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
+logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
 
 '''
 Set seed value to time since epoch that way each time program is run, 
@@ -85,12 +85,17 @@ logging.debug('Starting processing of file(s)')
 fastq_data_object = FastqFileData(args.Read1, args.Read2, args.subsample, args.output, args.compress, args.filetype, args.seed)
 
 #Analyzing fastq_infomration_object
+
+logging.debug('Starting reading_fastq_file from main script')
 fastq_data_object.reading_fastq_file()
 
+logging.debug('Starting determine_Fastq_ID_formatting from main script')
 fastq_data_object.determine_fastq_ID_formatting()
 
+logging.debug('Starting determine_paired_single_interleaved from main script')
 fastq_data_object.determine_paired_single_interleaved()
 
+logging.debug('Starting processing_filetype from main script')
 fastq_data_object.processing_filetype()
 
 logging.info('Sylens has finished processing files. Closing.')

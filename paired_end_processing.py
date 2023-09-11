@@ -5,7 +5,7 @@ import re
 
 from write_output_file import write_output_file
 
-def process_paired_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput, argsCompress, fastqDictionary1, fastqDictionary2, formatExpression, argsSeed):
+def process_paired_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput, argsCompress, fastqDictionary1, fastqDictionary2, formatExpression, formatExpression2, argsSeed):
 
     logging.info('No errors detected. Analyzing paired end files.')
 
@@ -15,13 +15,13 @@ def process_paired_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput,
     #Creating read 1 and read 2 lists to reference
     for element in list(fastqDictionary1):
 
-        if re.search(formatExpression, element) and element.endswith('1'):
+        if re.search(formatExpression, element):
 
             read1_list.append(element)
 
     for element in list(fastqDictionary2):
 
-        if re.search(formatExpression, element) and element.endswith('2'):
+        if re.search(formatExpression2, element):
 
             read2_list.append(element)
 
