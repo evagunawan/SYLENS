@@ -93,6 +93,6 @@ fastq_data_object.determine_paired_single_interleaved()
 
 fastq_data_object.processing_filetype()
 
-logging.info('Sylens has finished processing files. Closing')
+logging.info('Sylens has finished processing files. Closing.')
 
 sys.exit()
