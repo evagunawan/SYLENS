@@ -56,59 +56,84 @@ class FastqFileData:
 
             logging.info('Beginning to process file.')
 
-            self.fastqDictionary1 = create_dictionary(self.argsRead1, self.argsFiletype)
-            self.fastqDictionary2 = {None:None, None:None}
+            #Made exception. First, try creating a dictionary. With single illumina/casava files, dictionary will be created but will not have read number 
+            try:
 
-            return self.fastqDictionary1, self.fastqDictionary2
+                self.fastqDictionary1 = create_dictionary(self.argsRead1, self.argsFiletype)
+                self.fastqDictionary2 = {None:None, None:None}
 
+            #In cases of interleaved illumina/casava, duplicate keys are created since read # is found in description, will instead create blank dictionaries 
+            except ValueError:
+
+                self.fastqDictionary1 = {None:None, None:None}
+                self.fastqDictionary2 = {None:None, None:None}
         else:
 
             logging.info('Beginning to process files.')
 
+            #If illumina or casava, both dict will have same keys. Read number is found in description
             self.fastqDictionary1 = create_dictionary(self.argsRead1, self.argsFiletype)
             self.fastqDictionary2 = create_dictionary(self.argsRead2, self.argsFiletype)
 
-            return self.fastqDictionary1, self.fastqDictionary2
-        
+        return self.fastqDictionary1, self.fastqDictionary2
+
     #Determining format of fastq file to properly figure out if R1 and/or R2
     def determine_fastq_ID_formatting(self):
-
-        self.first_ID_1 = list(self.fastqDictionary1) [0]
-        self.last_ID_1 = list(self.fastqDictionary1) [-1]
-
-        self.first_ID_2 = list(self.fastqDictionary2) [0]
-        self.last_ID_2 = list(self.fastqDictionary2) [-1]
 
         #Taking the top 3 known formats and creating regular expressions to identify IDs. Stored REs in a dictinoary 
         # Illumina and Casava have same format, for now.
         format_dictionary = {
-            '(.+)(\d) (1)' :'IlluminaAndCasava',
-            '(^SRR)(\w+)[.+](\d+)[.+](1)': 'NCBI'
+            '(^SRR)(\w+)[.+](\d+)[.+](1)': 'NCBI',
+            '(.+)(\d) (1)' :'IlluminaAndCasava'
             }
 
         self.formatExpression = None
         self.format = None
 
-        for pattern in format_dictionary:
+        completed = False
 
-            if re.search(pattern, self.first_ID_1):
+        self.first_ID_1 = list(self.fastqDictionary1) [0]
+        self.last_ID_1 = list(self.fastqDictionary1) [-1]
 
-                self.formatExpression = pattern
+        self.first_ID_2 = list(self.fastqDictionary2) [0]
+        self.last_ID_2 = list(self.fastqDictionary2) [-1]        
 
-                self.format = format_dictionary[pattern]
+        #Exception to first try finding a pattern in first_ID
+        
+        try:
 
-                logging.debug(f'Regular expression found fastq ID format is {self.formatExpression}')
+            for pattern in format_dictionary:
+                
+                if re.search(pattern, self.first_ID_1):
 
-        if self.formatExpression == None:
+                    self.formatExpression = pattern
 
-            process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary)
+                    self.format = format_dictionary[pattern]
 
-        print(self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2,)
+                    logging.debug(f'Regular expression found fastq ID format is {self.formatExpression}')                
 
-        return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
+                    completed = True
+
+                    #Keeps for loop from trying again if pattern is found
+                    break
+
+            #If a dictionary was created for a file but a pattern is not found because the read ID was found in the description, feeds into alternative dictionary
+            if completed == False:
+
+                self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary)
+
+            return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
+
+        #Used if dictionary is made from an interleaved illumina/casava file has no matches which creates a TypeError 
+        except TypeError:
+
+            self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary)
+
+            return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
 
     #Figures out if input file is single, paired, or interleaved
     def determine_paired_single_interleaved(self):
+   
         if self.format == 'IlluminaAndCasava':
 
             self.formatExpression2 = '(.+)(\d) (2)'
@@ -135,15 +160,11 @@ class FastqFileData:
 
                 logging.info('File is an interleaved file.')
 
-                return self.determined_filetype
-
             if re.search(self.formatExpression, self.first_ID_1) and re.search(self.formatExpression, self.last_ID_1):
 
                 self.determined_filetype = 'Single-end'
 
                 logging.info('File is a single-end file.')
-
-                return self.determined_filetype
 
         if self.paired_file == True:
 
@@ -159,7 +180,7 @@ class FastqFileData:
     
                     self.determined_filetype = 'Paired-end'
 
-                    return self.determined_filetype
+        return self.determined_filetype
 
     #Writing output of determined filetype
     def processing_filetype(self):

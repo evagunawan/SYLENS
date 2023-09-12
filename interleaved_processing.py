@@ -23,8 +23,7 @@ def process_interleaved_sampling(argsRead1, argsSubsample, argsOutput, argsCompr
         if re.search(formatExpression2, element):
 
             read2_list.append(element)
-    print(read1_list [0])
-    print(read2_list [0])
+
     #Subsampling detected
     if argsSubsample != None:
         
