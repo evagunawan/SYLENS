@@ -2,7 +2,6 @@
 
 '''
 TODO Far future: Maybe add sam/bam file
-IN_PROCESS Learn about exceptions
 '''
 
 #SYLENS: Sampling Yielding LEss Noticeable Samples
@@ -17,7 +16,7 @@ import logging
 from read_fastq_file import FastqFileData
 
 
-# Creating class that displays help if no information is entered in parser
+# Creating class that displays help if no information is entered in parser and changes how the error is displayed when something is entered wrong
 class DownsamplerParser(argparse.ArgumentParser):
 
     def error(self, message):
