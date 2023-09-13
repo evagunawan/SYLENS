@@ -1,16 +1,14 @@
-#! usr/bin/env/ python3
-import logging
-import re
+#! usr/bin/env python3
+
 import sys
+import logging 
+import re
 
-def process_mistakes(firstR1, lastR1, firstR2, lastR2, formatExpression, formatExpression2):
+def process_illumina_casava_mistakes(firstR1, lastR1, firstR2, lastR2, format, formatExpression):
 
-    logging.info('Checking for common errors.')
-
-    if formatExpression == '(.+)(\d) (2)':
-
-        formatExpression2 = '(.+)(\d) (2)'
-        formatExpression = '(.+)(\d) (1)'
+    
+    
+    logging.info('Checking for common errors.')    
 
     #Errors if wrong files are supplied
     if re.search(formatExpression2, firstR1) and re.search(formatExpression2, lastR1):
