@@ -11,6 +11,7 @@ from process_paired_end_mistakes import process_mistakes
 from single_end_processing import process_single_end_sampling
 from interleaved_processing import process_interleaved_sampling
 from paired_end_processing import process_paired_end_sampling
+from second_file_format import determine_second_file_format
 
 #Function to create a dictionary, can be used when needed just by importing it
 
@@ -129,26 +130,37 @@ class FastqFileData:
 
                 else:
 
-                    #Added a error to catch read 2 file instead of read 1 or interleaved file
+                    #Added an error to catch read 2 file instead of read 1 or interleaved file
                     for pattern in format_dictionary_2:
 
                         if re.search(pattern, self.first_ID_1):
 
                             logging.critical('File appears to be a read 2 file instead of read 1 or interleaved file. Program terminating...')
 
-                            sys.exit(1)                        
- 
+                            sys.exit(1)  
+
             #If a dictionary was created for a file but a pattern is not found because the read ID was found in the description, feeds into alternative dictionary
             if completed == False:
 
                 self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
+
+            if self.first_ID_2 != None:
+
+                determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
 
             return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
 
         #Used if dictionary is made from an interleaved illumina/casava file has no matches which creates a TypeError 
         except TypeError:
 
+            logging.debug('TypeError path')
+
             self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
+ 
+            if self.first_ID_2 != None:
+
+                determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
+
 
             return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
 
