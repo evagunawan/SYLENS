@@ -73,7 +73,7 @@ Sylens.py FILE1.fastq FILE2.fastq -s 1000 -c --seed 1691696502 -f fastq-solexa -
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## **PROGRAM OUTLINE**
-![Sylens Program Map](Assets/Program_Map.PNG)
+
 
 ### **Legend**
 ![Sylens Legend](Assets/legend_Sylens.PNG)
