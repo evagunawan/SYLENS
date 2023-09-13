@@ -7,11 +7,6 @@ def process_mistakes(firstR1, lastR1, firstR2, lastR2, formatExpression, formatE
 
     logging.info('Checking for common errors.')
 
-    if formatExpression == '(.+)(\d) (2)':
-
-        formatExpression2 = '(.+)(\d) (2)'
-        formatExpression = '(.+)(\d) (1)'
-
     #Errors if wrong files are supplied
     if re.search(formatExpression2, firstR1) and re.search(formatExpression2, lastR1):
 
