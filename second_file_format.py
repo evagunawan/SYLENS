@@ -6,8 +6,6 @@ import sys
 
 from Bio import SeqIO
 
-from alternative_dictionary_processing import process_alternative_dictionary
-
 def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dictinoary_1, format_dictionary_2, ID_1_format):
 
     completed = False
@@ -25,7 +23,17 @@ def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dic
                 completed = True
 
                 break
-    
+
+            for pattern in format_dictinoary_1:
+
+                if re.search(pattern, first_ID_2):
+
+                    format = format_dictinoary_1[pattern]
+
+                    completed = True
+
+                    break
+
         except TypeError:
 
             pass
