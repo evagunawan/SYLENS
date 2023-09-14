@@ -104,6 +104,7 @@ class FastqFileData:
 
         completed = False
 
+        #Grabbing first and last IDs from the fastq dictionaries
         self.first_ID_1 = list(self.fastqDictionary1) [0]
         self.last_ID_1 = list(self.fastqDictionary1) [-1]
 
@@ -115,6 +116,7 @@ class FastqFileData:
 
             for pattern in format_dictionary:
 
+                #If re finds pattern in dictionary with read 1 IDs saves format and expression
                 if re.search(pattern, self.first_ID_1):
 
                     self.formatExpression = pattern
@@ -144,16 +146,17 @@ class FastqFileData:
 
                 self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
 
+            #If a second file is uploaded and a first ID for that file is found makes sure files have same formatting
             if self.first_ID_2 != None:
 
                 determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_2, format_dictionary, format_dictionary_2, self.format)
 
             return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
 
-        #Used if dictionary is made from an interleaved illumina/casava file has no matches which creates a TypeError 
+        #Creates a dictionary with keys that are the descriptions. Occurs if dictionary is made from an interleaved illumina/casava file and has no matches which creates a TypeError 
         except TypeError:
 
-            logging.debug('TypeError path')
+            logging.debug('TypeError path for dictionary production')
 
             self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
  
@@ -184,6 +187,7 @@ class FastqFileData:
             self.single_file = False
             self.paired_file = True
 
+        #If only one file was entered, figured out if it is interleaved or single end based on RE 
         if self.single_file == True:
 
             if re.search(self.formatExpression, self.first_ID_1) and re.search(self.formatExpression2, self.last_ID_1):
@@ -198,11 +202,7 @@ class FastqFileData:
 
                 logging.info('File is a single-end file.')
 
-            if re.search(self.formatExpression2, self.first_ID_1):
-                
-                logging.critical('Read 2 was supplied sintead of read 1 or interleaved file. Program terminating...')
-                sys.exit(1)
-
+        #If two files are entered, will initially process mistakes, i.e. 2 rev files. If passes mistakes, determines paired end
         if self.paired_file == True:
 
             process_mistakes(self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.formatExpression, self.formatExpression2)

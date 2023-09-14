@@ -6,6 +6,7 @@ import sys
 
 from Bio import SeqIO
 
+#Writing function to determine file formats
 def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dictionary_1, format_dictionary_2, ID_1_format):
 
     format = None
@@ -13,6 +14,7 @@ def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dic
 
     logging.debug('Determining if second file and first file have same format')
     
+    #For every pattern in the read 2 dictionary, looks for a match in ID 2's first read
     for pattern in format_dictionary_2:
 
         if re.search(pattern, first_ID_2):

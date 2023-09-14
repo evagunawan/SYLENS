@@ -92,7 +92,7 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
 
             if re.search(pattern, first_ID_1):
 
-                logging.critical('File appears to be a read 2 file instead of read 1 or interleaved file. Program terminating...')
+                logging.critical('Required positional file appears to be a reverse read file. Positional file should be a forward read or interleaved file. Program terminating...')
 
                 sys.exit(1)                    
 
