@@ -25,6 +25,8 @@ def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dic
 
             break
 
+    if format == None:
+
         for pattern in format_dictionary_1:
 
             if re.search(pattern, first_ID_2):
@@ -35,28 +37,27 @@ def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dic
 
                 break
 
- 
-        if completed != True:
+    if completed != True:
 
-            fastqDictionary2 = SeqIO.to_dict(SeqIO.parse(argsRead2, argsFiletype), key_function = lambda rec : rec.description)
+        fastqDictionary2 = SeqIO.to_dict(SeqIO.parse(argsRead2, argsFiletype), key_function = lambda rec : rec.description)
 
-            first_ID_2 = list(fastqDictionary2) [0]
+        first_ID_2 = list(fastqDictionary2) [0]
     
-            for pattern in format_dictionary_1:
+        for pattern in format_dictionary_1:
 
-                if re.search(pattern, first_ID_2):
+            if re.search(pattern, first_ID_2):
 
-                    format = format_dictionary_1[pattern]
+                format = format_dictionary_1[pattern]
 
-                    break
+                break
     
-            for pattern in format_dictionary_2:
+        for pattern in format_dictionary_2:
 
-                if re.search(pattern, first_ID_2):
+            if re.search(pattern, first_ID_2):
 
-                    format = format_dictionary_2[pattern]
+                format = format_dictionary_2[pattern]
 
-                    break
+                break
     
     if ID_1_format == format:
 
