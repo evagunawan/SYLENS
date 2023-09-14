@@ -135,7 +135,7 @@ class FastqFileData:
 
                         if re.search(pattern, self.first_ID_1):
 
-                            logging.critical('File appears to be a read 2 file instead of read 1 or interleaved file. Program terminating...')
+                            logging.critical('Required positional file appears to be a reverse read file. Positional file should be a forward read or interleaved file. Program terminating...')
 
                             sys.exit(1)  
 
@@ -146,7 +146,7 @@ class FastqFileData:
 
             if self.first_ID_2 != None:
 
-                determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
+                determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_2, format_dictionary, format_dictionary_2, self.format)
 
             return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
 
@@ -160,7 +160,6 @@ class FastqFileData:
             if self.first_ID_2 != None:
 
                 determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
-
 
             return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
 
