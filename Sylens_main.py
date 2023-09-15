@@ -83,8 +83,7 @@ logging.debug('Starting processing of file(s)')
 #Created fastq file object using the parameters specified in secondary script 
 fastq_data_object = FastqFileData(args.Read1, args.Read2, args.subsample, args.output, args.compress, args.filetype, args.seed)
 
-#Analyzing fastq_infomration_object
-
+#Analyzing fastq_information_object
 logging.debug('Starting reading_fastq_file from main script')
 fastq_data_object.reading_fastq_file()
 
