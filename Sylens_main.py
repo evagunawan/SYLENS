@@ -67,7 +67,7 @@ parser.add_argument('-c', '--compress',
 args = parser.parse_args()
 
 #Format for logging debug-critical information
-logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
+logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
 
 '''
 Set seed value to time since epoch that way each time program is run, 

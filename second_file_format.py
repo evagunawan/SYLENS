@@ -19,6 +19,8 @@ def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dic
 
         if re.search(pattern, first_ID_2):
 
+            format_expression_2 = pattern
+
             format = format_dictionary_2[pattern]
 
             completed = True
@@ -30,6 +32,8 @@ def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dic
         for pattern in format_dictionary_1:
 
             if re.search(pattern, first_ID_2):
+
+                format_expression_2 = pattern
 
                 format = format_dictionary_1[pattern]
 
@@ -47,6 +51,8 @@ def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dic
 
             if re.search(pattern, first_ID_2):
 
+                format_expression_2 = pattern
+
                 format = format_dictionary_1[pattern]
 
                 break
@@ -55,6 +61,8 @@ def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dic
 
             if re.search(pattern, first_ID_2):
 
+                format_expression_2 = pattern
+                
                 format = format_dictionary_2[pattern]
 
                 break
@@ -68,3 +76,5 @@ def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dic
         logging.critical(f'File formats are different. First file format is {ID_1_format} but second file format is {format}. Program terminating...')
 
         sys.exit(1)
+    
+    return format_expression_2

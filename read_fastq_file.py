@@ -180,7 +180,7 @@ class FastqFileData:
 
             if self.first_ID_2 != None:
 
-                determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
+                self.format_expression_2 = determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
 
             logging.debug('Return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression')
 
