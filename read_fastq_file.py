@@ -52,36 +52,42 @@ class FastqFileData:
 
         if self.argsRead2 == None:
 
-            logging.info('Beginning to process file.')
+            logging.info('Beginning to process one input file.')
 
             #Made exception. First, try creating a dictionary. With single illumina/casava files, dictionary will be created but will not have read number 
             try:
 
+                logging.debug('Beginning Try statement')
                 self.fastqDictionary1 = create_dictionary(self.argsRead1, self.argsFiletype)
                 self.fastqDictionary2 = {None:None, None:None}
 
             #In cases of interleaved illumina/casava, duplicate keys are created since read # is found in description, will instead create blank dictionaries 
             except ValueError:
 
+                logging.debug('Beginning ValueError statement')
                 self.fastqDictionary1 = {None:None, None:None}
                 self.fastqDictionary2 = {None:None, None:None}
 
         else:
 
-            logging.info('Beginning to process files.')
+            logging.info('Beginning to process two input files.')
 
-            #Made exception. First try making a dict. If illumina/casava both dict will have same keys. Read number is found in description
+            #Made exception. First try making a dict. If illumina/casava both dict will have same keys, read number is found in description
             try:
 
+                logging.debug('Beginning Try statement')               
                 self.fastqDictionary1 = create_dictionary(self.argsRead1, self.argsFiletype)
                 self.fastqDictionary2 = create_dictionary(self.argsRead2, self.argsFiletype)
 
             #In cases where incorrect files were uploaded, i.e. two casava read 2s, this creates blank dict to send to alternative dict process where problem can be identified.
             except ValueError:
 
+                logging.debug('Beginning ValueError statement')
                 self.fastqDictionary1 = {None:None, None:None}
                 self.fastqDictionary2 = {None:None, None:None}
 
+        logging.debug('Returning fastqDictionary1 and fastqDictionary2')
+        
         return self.fastqDictionary1, self.fastqDictionary2
 
     #Determining format of fastq file to properly figure out if R1 and/or R2
@@ -111,8 +117,12 @@ class FastqFileData:
         self.first_ID_2 = list(self.fastqDictionary2) [0]
         self.last_ID_2 = list(self.fastqDictionary2) [-1]        
 
+        logging.debug(f'Acquired first and last IDs: {self.first_ID_1}, {self.last_ID_1}, {self.first_ID_2}, {self.last_ID_2}')
+
         #Exception to first try finding a pattern in first_ID
         try:
+
+            logging.debug('Starting try statment')
 
             for pattern in format_dictionary:
 
@@ -144,31 +154,44 @@ class FastqFileData:
             #If a dictionary was created for a file but a pattern is not found because the read ID was found in the description, feeds into alternative dictionary
             if completed == False:
 
+                logging.debug('No format expression was found. Now creating a new dictionary to access file input.')
+
                 self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
 
             #If a second file is uploaded and a first ID for that file is found makes sure files have same formatting
             if self.first_ID_2 != None:
 
+                logging.debug('Determine if second file matches first file formatting')
+
                 determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_2, format_dictionary, format_dictionary_2, self.format)
+
+            logging.debug('Returning self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression')
 
             return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
 
         #Creates a dictionary with keys that are the descriptions. Occurs if dictionary is made from an interleaved illumina/casava file and has no matches which creates a TypeError 
         except TypeError:
 
-            logging.debug('TypeError path for dictionary production')
+            logging.debug('TypeError path for dictionary production. Occurs when duplicate keys are made in dictionary from interleaved illumina/casava files.')
 
             self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
  
+            logging.debug('Looking to see if second uploaded file matches the first file format.')
+
             if self.first_ID_2 != None:
 
                 determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
+
+            logging.debug('Return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression')
 
             return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
 
     #Figures out if input file is single, paired, or interleaved
     def determine_paired_single_interleaved(self):
 
+        logging.debug('Setting up second file expression')
+
+        #############################Try loop instead so I don't have to code in each format that we add new formats?#############################
         if self.format == 'IlluminaAndCasava':
 
             self.formatExpression2 = '(.+)(\d) (2)'
@@ -216,6 +239,8 @@ class FastqFileData:
                     logging.debug('Reverse file is correct.')
     
                     self.determined_filetype = 'Paired-end'
+
+        logging.debug('Returned self.determined_filetype')
 
         return self.determined_filetype
 
