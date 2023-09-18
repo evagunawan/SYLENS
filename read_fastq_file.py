@@ -12,6 +12,7 @@ from single_end_processing import process_single_end_sampling
 from interleaved_processing import process_interleaved_sampling
 from paired_end_processing import process_paired_end_sampling
 from second_file_format import determine_second_file_format
+from alternative_dictionary_processing import get_key
 
 #Function to create a dictionary, can be used when needed just by importing it
 
@@ -22,7 +23,7 @@ data blueprint. This object can then be applied throughout the main script
 
 class FastqFileData:
 
-    def __init__(self, argsRead1, argsRead2, argsSubsample, argsOutput, argsCompress, argsFiletype, argsSeed):
+    def __init__(self, argsRead1, argsRead2, argsSubsample, argsOutput, argsCompress, argsFiletype, argsSeed, argsPercentage):
 
         self.argsRead1 = argsRead1
         self.argsRead2 = argsRead2
@@ -31,6 +32,7 @@ class FastqFileData:
         self.argsCompress = argsCompress 
         self.argsFiletype = argsFiletype   
         self.argsSeed = argsSeed
+        self.argsPercentage = argsPercentage
   
     def reading_fastq_file(self):
 
@@ -49,7 +51,7 @@ class FastqFileData:
                     fastqDictionary = SeqIO.to_dict(SeqIO.parse(infile, argsFiletype))
     
             return fastqDictionary
-
+        
         if self.argsRead2 == None:
 
             logging.info('Beginning to process one input file.')
@@ -87,7 +89,7 @@ class FastqFileData:
                 self.fastqDictionary2 = {None:None, None:None}
 
         logging.debug('Returning fastqDictionary1 and fastqDictionary2')
-        
+
         return self.fastqDictionary1, self.fastqDictionary2
 
     #Determining format of fastq file to properly figure out if R1 and/or R2
@@ -122,7 +124,7 @@ class FastqFileData:
         #Exception to first try finding a pattern in first_ID
         try:
 
-            logging.debug('Starting try statment')
+            logging.debug('Starting try statment in determine fastq ID formatting')
 
             for pattern in format_dictionary:
 
@@ -137,8 +139,15 @@ class FastqFileData:
 
                     completed = True
 
-                    #Keeps for loop from trying again if pattern is found
-                    break
+                    self.formatExpression2 = get_key(self.format, format_dictionary_2)
+                    
+                    if not re.search(self.formatExpression2, self.first_ID_2):
+                        
+                        logging.critical('There is an issue with file formats. i.e. two interleaved files or two different file formats. Program terminating...')
+
+                        sys.exit(1)
+
+                    return self.formatExpression, self.formatExpression2
 
                 else:
 
@@ -156,50 +165,47 @@ class FastqFileData:
 
                 logging.debug('No format expression was found. Now creating a new dictionary to access file input.')
 
-                self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
+                self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2 = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
 
             #If a second file is uploaded and a first ID for that file is found makes sure files have same formatting
             if self.first_ID_2 != None:
 
                 logging.debug('Determine if second file matches first file formatting')
 
-                determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_2, format_dictionary, format_dictionary_2, self.format)
+                self.formatExpression2 = determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_2, format_dictionary, format_dictionary_2, self.format)
 
-            logging.debug('Returning self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression')
-
-            return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
+                logging.debug('Returning self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2')
+            
+            return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2
 
         #Creates a dictionary with keys that are the descriptions. Occurs if dictionary is made from an interleaved illumina/casava file and has no matches which creates a TypeError 
         except TypeError:
 
-            logging.debug('TypeError path for dictionary production. Occurs when duplicate keys are made in dictionary from interleaved illumina/casava files.')
+            if self.format != None:
 
-            self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
+                pass
+            
+            else:
+
+                logging.debug('TypeError path for dictionary production. Occurs when duplicate keys are made in dictionary from interleaved illumina/casava files.')
+
+                self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2 = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
  
-            logging.debug('Looking to see if second uploaded file matches the first file format.')
+                logging.debug('Looking to see if second uploaded file matches the first file format.')
 
             if self.first_ID_2 != None:
 
-                self.format_expression_2 = determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
+                self.formatExpression2 = determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
 
-            logging.debug('Return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression')
+            logging.debug('Return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2')
 
-            return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression
+            return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2, self.fastqDictionary1, self.fastqDictionary2
 
     #Figures out if input file is single, paired, or interleaved
     def determine_paired_single_interleaved(self):
 
         logging.debug('Setting up second file expression')
-
-        #############################Try loop instead so I don't have to code in each format that we add new formats?#############################
-        if self.format == 'IlluminaAndCasava':
-
-            self.formatExpression2 = '(.+)(\d) (2)'
-
-        if self.format == 'NCBI':
-
-            self.formatExpression2 = '(^SRR)(\w+)[.+](\d+)[.+](2)'
-
+        
         if self.argsRead2 == None:
 
             self.single_file = True
@@ -212,12 +218,14 @@ class FastqFileData:
 
         #If only one file was entered, figured out if it is interleaved or single end based on RE 
         if self.single_file == True:
+            
+            if self.formatExpression2 != None:
 
-            if re.search(self.formatExpression, self.first_ID_1) and re.search(self.formatExpression2, self.last_ID_1):
+                if re.search(self.formatExpression, self.first_ID_1) and re.search(self.formatExpression2, self.last_ID_1):
 
-                self.determined_filetype = 'Interleaved'
+                    self.determined_filetype = 'Interleaved'
 
-                logging.info('File is an interleaved file.')
+                    logging.info('File is an interleaved file.')
 
             if re.search(self.formatExpression, self.first_ID_1) and re.search(self.formatExpression, self.last_ID_1):
 
@@ -247,6 +255,28 @@ class FastqFileData:
     #Writing output of determined filetype
     def processing_filetype(self):
 
+        def percentage(subsample, dictionary):
+
+            logging.debug('Determined number to sample if percentage == True')
+
+            if self.argsPercentage == True:
+
+                length = len(dictionary)
+
+                self.argsSubsample = int(length) * int(subsample) / int(100)
+ 
+                self.argsSubsample = int(self.argsSubsample)
+
+                logging.debug(f'Returning self.argsSubsample as {self.argsSubsample}')
+                
+                return self.argsSubsample
+            
+            else:
+
+                return subsample
+        
+        self.argsSubsample = percentage(self.argsSubsample, self.fastqDictionary1)
+        
         if self.determined_filetype == 'Single-end':
 
             process_single_end_sampling(self.argsRead1, self.argsRead2, self.argsSubsample, self.argsOutput, self.argsCompress, self.fastqDictionary1, self.argsSeed)

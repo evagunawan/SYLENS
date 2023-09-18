@@ -10,6 +10,7 @@ from Bio import SeqIO
 def determine_second_file_format(argsRead2, argsFiletype, first_ID_2, format_dictionary_1, format_dictionary_2, ID_1_format):
 
     format = None
+    format_expression_2 = None
     completed = False
 
     logging.debug('Determining if second file and first file have same format')

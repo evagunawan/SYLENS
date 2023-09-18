@@ -7,6 +7,15 @@ import gzip
 
 from Bio import SeqIO
 
+def get_key(format1, format_dictionary_2):
+
+    for key, value in format_dictionary_2.items():
+
+        if format1 == value:
+
+            formatExpression2 = key
+
+            return formatExpression2
 
 def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_dictionary, format_dictionary_2):
 
@@ -26,6 +35,8 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
 
                 logging.info(f'Fastq Formatting type is: {format}')
 
+                return format, formatExpression
+
         #Looking through all the patterns in the dictionary 2
         for pattern in format_dictionary_2:
 
@@ -39,7 +50,7 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
 
                 logging.info(f'Fastq Formatting type is: {format}')
 
-        return format, formatExpression
+                return format, formatExpression
  
     def create_original_dict(argsRead2, argsFiletype):
 
@@ -60,9 +71,10 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
     logging.debug('Entered into process_alternative_dictionary')
 
     format2 = None
+    formatExpression2 = None
 
     if argsRead2 == None:
-
+        
         logging.debug('No read 2')
 
         fastqDictionary1 = SeqIO.to_dict(SeqIO.parse(argsRead1, argsFiletype), key_function = lambda rec : rec.description)
@@ -76,6 +88,14 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
 
         logging.debug(f'Formatting new dictionary with new first read 1: {first_ID_1} and new last read 1: {last_ID_1}')
 
+        for pattern in format_dictionary_2:
+
+            if re.search(pattern, first_ID_1):
+
+                logging.critical('Required positional file appears to be a reverse read file. Positional file should be a forward read or interleaved file. Program terminating...')
+
+                sys.exit(1)   
+
         for pattern in format_dictionary:
 
             if re.search(pattern, first_ID_1):
@@ -88,13 +108,7 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
 
                 logging.info(f'Fastq Formatting type is: {format1}')
 
-        for pattern in format_dictionary_2:
-
-            if re.search(pattern, first_ID_1):
-
-                logging.critical('Required positional file appears to be a reverse read file. Positional file should be a forward read or interleaved file. Program terminating...')
-
-                sys.exit(1)                    
+        formatExpression2 = get_key(format1, format_dictionary_2)                 
 
     if argsRead2 != None:
 
@@ -120,7 +134,7 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
 
             format2, formatExpression2 = check_dict_format(format_dictionary, format_dictionary_2, first_ID_2)
 
-        except (ValueError, UnboundLocalError) as errors:
+        except:
 
             fastqDictionary2 = SeqIO.to_dict(SeqIO.parse(argsRead2, argsFiletype), key_function = lambda rec : rec.description)
 
@@ -133,7 +147,7 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
 
             pass
 
-        if formatExpression1 == '(^SRR)(\w+)[.+](\d+)[.+](2)' or formatExpression1 == '(.+)(\d) (2)':
+        if formatExpression1.endswith('(2)'):
 
             logging.critical('Required positional file appears to be a reverse read file. Positional file should be a forward read or interleaved file. Program terminating...')
     
@@ -147,4 +161,10 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
         
         logging.debug(f'Formatting new dictionary with new first read 2: {first_ID_2} and new last read 2: {last_ID_2}')
     
-    return fastqDictionary1, fastqDictionary2, first_ID_1, last_ID_1, first_ID_2, last_ID_2, format1, formatExpression1
+        if formatExpression1 == formatExpression2:
+
+            logging.critical('Files appear to be the same file type I.E. two interleaved files, single end files, or interleaved files. Program terminating...')
+
+            sys.exit(1)
+
+    return fastqDictionary1, fastqDictionary2, first_ID_1, last_ID_1, first_ID_2, last_ID_2, format1, formatExpression1, formatExpression2

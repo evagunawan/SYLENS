@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
 '''
-TODO Far future: Maybe add sam/bam file
+TODO % of files instead of just a number
+TODO Flesh out readme
+TODO GNU GPLv3* license research
+TODO reading up containerize Sylens 
+TODO Put together request for new laptop
 '''
 
 #SYLENS: Sampling Yielding LEss Noticeable Samples
@@ -62,12 +66,17 @@ parser.add_argument('-c', '--compress',
     action = 'store_true',
     help = "Compress fastq file into fastq.gz file on output. I.E. -c"
     )
+parser.add_argument('-p', '--percentage',
+    default = False,
+    action = 'store_true',
+    help = "With the -p flag, ubsampling is done as a percentage of reads instead of an indicated number of reads. Percentage of reads should be an integer between 1-100. I.E. -p -s 15"
+    )
 
 #Runs the parser and allows you to call arguments downstream
 args = parser.parse_args()
 
 #Format for logging debug-critical information
-logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
+logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
 
 '''
 Set seed value to time since epoch that way each time program is run, 
@@ -81,7 +90,7 @@ logging.info(f"This run's seed number is {args.seed}")
 logging.debug('Starting processing of file(s)')
 
 #Created fastq file object using the parameters specified in secondary script 
-fastq_data_object = FastqFileData(args.Read1, args.Read2, args.subsample, args.output, args.compress, args.filetype, args.seed)
+fastq_data_object = FastqFileData(args.Read1, args.Read2, args.subsample, args.output, args.compress, args.filetype, args.seed, args.percentage)
 
 #Analyzing fastq_information_object
 logging.debug('Starting reading_fastq_file from main script')
