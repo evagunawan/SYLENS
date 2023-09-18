@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 '''
-TODO % of files instead of just a number
 TODO Flesh out readme
 TODO GNU GPLv3* license research
 TODO reading up containerize Sylens 
