@@ -41,8 +41,6 @@ def process_paired_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput,
         input_file_name_1 = f'{argsSeed}_downsampled_{argsRead1}'
         input_file_name_2 = f'{argsSeed}_downsampled_{argsRead2}'
 
-        input_file_name_1 = f'{argsSeed}_downsampled_{argsRead1}'
-
     #No subsampling    
     if argsSubsample == None:
 

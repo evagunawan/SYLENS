@@ -23,6 +23,7 @@ data blueprint. This object can then be applied throughout the main script
 
 class FastqFileData:
 
+    #Creating init class for all the arguments
     def __init__(self, argsRead1, argsRead2, argsSubsample, argsOutput, argsCompress, argsFiletype, argsSeed, argsPercentage):
 
         self.argsRead1 = argsRead1
@@ -33,9 +34,11 @@ class FastqFileData:
         self.argsFiletype = argsFiletype   
         self.argsSeed = argsSeed
         self.argsPercentage = argsPercentage
-  
+
+    #Setting up function to process fastq file
     def reading_fastq_file(self):
 
+        #Creating function to call to create dictionary
         def create_dictionary(input_file, argsFiletype):
 
             if input_file.endswith('.gz'):
@@ -52,6 +55,7 @@ class FastqFileData:
     
             return fastqDictionary
         
+        #If only one file was entered
         if self.argsRead2 == None:
 
             logging.info('Beginning to process one input file.')
@@ -70,11 +74,12 @@ class FastqFileData:
                 self.fastqDictionary1 = {None:None, None:None}
                 self.fastqDictionary2 = {None:None, None:None}
 
+        #If two files are entered
         else:
 
             logging.info('Beginning to process two input files.')
 
-            #Made exception. First try making a dict. If illumina/casava both dict will have same keys, read number is found in description
+            #Made exception. First try making a dict. If illumina/casava both dict will have same keys, but read number is found in description
             try:
 
                 logging.debug('Beginning Try statement')               
@@ -112,7 +117,7 @@ class FastqFileData:
 
         completed = False
 
-        #Grabbing first and last IDs from the fastq dictionaries
+        #Grabbing first and last IDs from the input file dictionaries
         self.first_ID_1 = list(self.fastqDictionary1) [0]
         self.last_ID_1 = list(self.fastqDictionary1) [-1]
 
@@ -121,7 +126,7 @@ class FastqFileData:
 
         logging.debug(f'Acquired first and last IDs: {self.first_ID_1}, {self.last_ID_1}, {self.first_ID_2}, {self.last_ID_2}')
 
-        #Exception to first try finding a pattern in first_ID
+        #Exception to first try finding a pattern in first_ID. This should find a pattern in any NCBI fomatted file
         try:
 
             logging.debug('Starting try statment in determine fastq ID formatting')
@@ -141,14 +146,18 @@ class FastqFileData:
 
                     self.formatExpression2 = get_key(self.format, format_dictionary_2)
                     
+                    #Used to stop processing of two different file formats are found, i.e. for NCBI with rev Illum files
                     if not re.search(self.formatExpression2, self.first_ID_2):
                         
-                        logging.critical('There is an issue with file formats. i.e. two interleaved files or two different file formats. Program terminating...')
+                        logging.critical('There is an issue with file formats. i.e. two files with two different file formats like NCBI paired with ILlumina or two interleaved files. Program terminating...')
 
                         sys.exit(1)
 
+                    logging.debug('Returning self.formatExpression and self.formatExpression2')
+
                     return self.formatExpression, self.formatExpression2
 
+                #If a pattern cannot be found in forward dictionary
                 else:
 
                     #Added an error to catch read 2 file instead of read 1 or interleaved file
@@ -193,6 +202,7 @@ class FastqFileData:
  
                 logging.debug('Looking to see if second uploaded file matches the first file format.')
 
+            #Checking file format to ensure both files are same file format
             if self.first_ID_2 != None:
 
                 self.formatExpression2 = determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)

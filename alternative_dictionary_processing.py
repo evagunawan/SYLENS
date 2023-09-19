@@ -163,7 +163,7 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
     
         if formatExpression1 == formatExpression2:
 
-            logging.critical('Files appear to be the same file type I.E. two interleaved files, single end files, or interleaved files. Program terminating...')
+            logging.critical('Files appear to be the same file type I.E. two interleaved files or single end forward files. Program terminating...')
 
             sys.exit(1)
 

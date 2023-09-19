@@ -68,7 +68,7 @@ parser.add_argument('-c', '--compress',
 parser.add_argument('-p', '--percentage',
     default = False,
     action = 'store_true',
-    help = "With the -p flag, ubsampling is done as a percentage of reads instead of an indicated number of reads. Percentage of reads should be an integer between 1-100. I.E. -p -s 15"
+    help = "With the -p flag, subsampling is done as a percentage of reads instead of an indicated number of reads. Percentage of reads should be an integer between 1-100. I.E. -p -s 15"
     )
 
 #Runs the parser and allows you to call arguments downstream

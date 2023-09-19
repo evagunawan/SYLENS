@@ -5,9 +5,6 @@ import sys
 
 def process_mistakes(firstR1, lastR1, firstR2, lastR2, formatExpression, formatExpression2):
 
-    print(f'{firstR1} {lastR2} {firstR2} {lastR2}')
-    print(formatExpression)
-    print(formatExpression2)
     logging.info('Checking for common errors.')
 
     #Errors if wrong files are supplied
