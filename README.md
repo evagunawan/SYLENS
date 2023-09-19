@@ -90,4 +90,5 @@ Output files by default will be fastq files. If the output filetype indicated is
 ## **AUTHORS**
 [Eva Gunawan](https://github.com/evagunawan), Bioinformatics Fellow through APHL
 
+Mentored by:
 [Kelsey Florek](https://github.com/k-florek), WSLH Senior Genomics and Data Scientist
