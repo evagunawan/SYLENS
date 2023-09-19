@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
 
-'''
-TODO Flesh out readme
-TODO GNU GPLv3* license research
-TODO reading up containerize Sylens 
-TODO Put together request for new laptop
-'''
-
 #SYLENS: Sampling Yielding LEss Noticeable Samples
 
 ###Importing libraries### 
