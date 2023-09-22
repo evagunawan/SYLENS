@@ -7,7 +7,7 @@ Have **too** many reads? It's not a problem anymore!
 
 ## **SUMMARY**
 
-Sylens is a Python program designed to intake fastq files and user inputs through [**argparse**](https://docs.python.org/3/library/argparse.html) and alter the fastq file output with [**Bio.SeqIO**](https://biopython.org/wiki/SeqIO). This program not only allows for file output conversions based on user preferences, but can randomly down sample fastq files that have millions of reads based on a user supplied integer or subsampled based on a percentage of reads. 
+Sylens is a Python program designed to intake **fastq** files and user inputs through [**argparse**](https://docs.python.org/3/library/argparse.html) and alter the fastq file output with [**Bio.SeqIO**](https://biopython.org/wiki/SeqIO). This program not only allows for file output conversions based on user preferences, but can randomly down sample fastq files that have millions of reads based on a user supplied integer or subsampled based on a percentage of reads. 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## **TABLE OF CONTENTS:**
@@ -107,14 +107,13 @@ Output files by default will be written in ASCII 33 fastq format. If the output 
 non_downsampled_{Original file name}
 ```
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
-Community Contributions
--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 ## Bug reporting
-Find a bug? Let me know! Please file a new issue with a title and description of the bug in the Sylens repository. If you have a solution to the issue, I would love to review your pull request! 
+Find a bug? Let me know! I'm still learning so any additional guidance, comments, and suggestions would be welcomed! Please file a new issue with a title and description of the bug in the Sylens repository. If you have a solution to the issue, I would love to review your pull request! 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Known Issues
-
+None, at the moment! But if you find one, please refer to "Bug Reporting".
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## **AUTHORS**
