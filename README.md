@@ -3,22 +3,38 @@
 
 **S**ampling **Y**ielding **LE**ss **N**oticeable **S**amples
 
+Have **too** many reads? It's not a problem anymore!
+
 ## **SUMMARY**
 
-Sylens is a Python program designed to intake user inputs through [**argparse**](https://docs.python.org/3/library/argparse.html) and alter the output with [**Bio.SeqIO**](https://biopython.org/wiki/SeqIO). This program not only allows for file output conversions based on user preferences, but can randomly down sample fastq files that have millions of reads for future analyses. 
+Sylens is a Python program designed to intake fastq files and user inputs through [**argparse**](https://docs.python.org/3/library/argparse.html) and alter the fastq file output with [**Bio.SeqIO**](https://biopython.org/wiki/SeqIO). This program not only allows for file output conversions based on user preferences, but can randomly down sample fastq files that have millions of reads based on a user supplied integer or subsampled based on a percentage of reads. 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## **TABLE OF CONTENTS:**
 
 Summary
 
-Usage
-
 Program Outline
+
+Usage
 
 Output
 
+Bug Reporting
+
+Known Issues
+
 Authors
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## **PROGRAM OUTLINE**
+![Sylens Program Map](Assets/Program_Map_Sylens.PNG)
+
+Sylens works by analyzing the ID configuration of the supplied FASTQ file(s). Currently, Sylens can analyze NCBI, Illumina, and Casava formatted fastq files. The program then determines if the input file is an interleaved or single end file. If two files are input, Sylens will ensure that the required positional file is a forward file and the second file is a reverse file. If subsampling is desired, it will randomly subsample the fastq files and generate a seed for the run. This seed can be used to reproduce results, if desired. File formatting can be converted to and from ASCII 64 (fastq-solexa) and ASCII 33 (sanger) formats. The files can be written in both compressed and uncompressed format. 
+
+### **Legend**
+![Sylens Legend](Assets/legend_Sylens.PNG)
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -51,7 +67,7 @@ By default Sylens will subsample to the exact integer indicated after the -s fla
 Sylens_main.py FILE1.fastq -p -s 10
 ```
 
-Compressing or not compressing a file on output is done by using the `-c` flag. If a .gz file is input, the output will be .gz. By default, no compression occurs on output.
+Compressing a file on output is done by using the `-c` flag. If a .gz file is input, the output will automatically be .gz. By default, no compression occurs on output.
 ```
 Sylens_main.py FILE1.fastq -c
 ```
@@ -77,15 +93,29 @@ Sylens_main.py FILE1.fastq FILE2.fastq -s 1000 -c --seed 1691696502 -f fastq-sol
 ```
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
-## **PROGRAM OUTLINE**
-![Sylens Program Map](Assets/Program_Map_Sylens.PNG)
-
-### **Legend**
-![Sylens Legend](Assets/legend_Sylens.PNG)
--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## **OUTPUT**
-Output files by default will be fastq files. If the output filetype indicated is differet than the input format, Bio.SeqIO will write it to the desired output.
+Output files by default will be written in ASCII 33 fastq format. If the output filetype indicated is differet than the input format, Bio.SeqIO will write it to the desired output. Currently two formats are supported: ASCII 64 (fastq-solexa) and ASCII 33 (sanger). If subsampling occurs, the seed value will be stored in the file name. 
+
+#### Subsampling output formatting is :
+```
+{Seed Value}_downsampled_{Original File name} 
+```
+
+#### No subsampling output formatting is :
+```
+non_downsampled_{Original file name}
+```
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+Community Contributions
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+## Bug reporting
+Find a bug? Let me know! Please file a new issue with a title and description of the bug in the Sylens repository. If you have a solution to the issue, I would love to review your pull request! 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Known Issues
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## **AUTHORS**
 [Eva Gunawan](https://github.com/evagunawan), Bioinformatics Fellow through APHL
