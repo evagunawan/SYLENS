@@ -14,8 +14,6 @@ Sylens is a Python program designed to intake **FASTQ** files and user inputs th
 
 Summary
 
-Table of Contents
-
 Program Outline
 
 Usage
