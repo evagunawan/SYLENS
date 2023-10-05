@@ -10,6 +10,7 @@ def process_single_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput,
     output_object_2 = None
     input_file_name_2 = None
 
+    #If no subsampling is desired
     if argsSubsample != None:
 
         logging.info('Downsampling beginning...')
@@ -22,6 +23,7 @@ def process_single_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput,
 
         logging.info('Writing to file...')
 
+    #If subsampling is desired
     if argsSubsample == None:
         
         logging.info('No downsampling of single-end file.')
@@ -34,6 +36,7 @@ def process_single_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput,
 
         logging.info('Writing to file...')
 
+    #Writes output file
     write_output_file(argsRead1, argsRead2, argsCompress, input_file_name_1, input_file_name_2, output_object_1, output_object_2, argsOutput)
 
     logging.info(f'Finished processing of {argsRead1}. Output is stored in {input_file_name_1}')

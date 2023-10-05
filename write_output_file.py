@@ -4,18 +4,21 @@ import logging
 
 from Bio import SeqIO
 
+#If no compression is desired
 def no_compress(file_name, object_output, argsOutput):
 
     with open(f'{file_name}', 'wt') as IDs_Seq_File:
 
         SeqIO.write(object_output, IDs_Seq_File, argsOutput)  
 
+#If compression is desired
 def compress_gz(file_name, output_object, argsOutput,):
 
     with gzip.open(f'{file_name}', 'wt') as IDs_Seq_File:
 
         SeqIO.write(output_object, IDs_Seq_File, argsOutput)
 
+#If file is an interleaved file that needs to be compressed 
 def compress_interleaved(argsOutput, output_1, output_2, input_file_name, count, R1_count, R2_count):
 
     with gzip.open(f"{input_file_name}", 'wt') as IDs_Seq_File:
@@ -39,6 +42,7 @@ def compress_interleaved(argsOutput, output_1, output_2, input_file_name, count,
                     SeqIO.write(output_2[R2_count], IDs_Seq_File, argsOutput)
                     R2_count += 1
 
+#If no compression is desired on an interleaved file
 def no_compress_interleaved(argsOutput, output_1, output_2, input_file_name, count, R1_count, R2_count):
     logging.debug('Writing to file.')
 
@@ -60,6 +64,7 @@ def no_compress_interleaved(argsOutput, output_1, output_2, input_file_name, cou
                     SeqIO.write(output_2[R2_count], IDs_Seq_File, argsOutput)
                     R2_count += 1
 
+#How to write the interleaved file
 def write_interleaved_file(argsRead1, argsOutput, argsCompress, output_1, output_2, input_file_name):
 
     logging.debug('In writing interleaved file')
@@ -85,30 +90,37 @@ def write_interleaved_file(argsRead1, argsOutput, argsCompress, output_1, output
 
         no_compress_interleaved(argsOutput, output_1, output_2, input_file_name, count, R1_count, R2_count)
 
+#Writing output file 
 def write_output_file(argsRead1, argsRead2, argsCompress, file_name_1, file_name_2, output_1, output_2, argsOutput):
 
+    #If there is no read 2
     if argsRead2 == None:
 
         logging.debug('Entered into argsread2 == None in write_output_file')
 
+        #Compression inherent since OG file ends with .gz
         if argsRead1.endswith('.gz'):
 
             compress_gz(file_name_1, output_1, argsOutput)
 
+        #Compression desired and OG file does not end with .gz
         elif argsCompress == True and not argsRead1.endswith('.gz'):
 
             file_name_1 = file_name_1 + '.gz'
 
             compress_gz(file_name_1, output_1, argsOutput)
 
+        #No compression desired
         elif argsCompress != True:
 
             no_compress(file_name_1, output_1, argsOutput)               
 
+    #If read 2 is present
     if argsRead2 != None:
 
         logging.debug('Entered into argsread2 != None in write_output_file')
 
+        #Compression is inherent since OG file ends with .gz
         if argsRead1.endswith('.gz'):
 
             compress_gz(file_name_1, output_1, argsOutput)
@@ -117,6 +129,7 @@ def write_output_file(argsRead1, argsRead2, argsCompress, file_name_1, file_name
             
             compress_gz(file_name_2, output_2, argsOutput)
 
+        #Compression desired and OG files does not end with .gz
         if argsCompress == True and not argsRead1.endswith('.gz'):
 
             file_name_1 = file_name_1 + '.gz'
@@ -127,6 +140,7 @@ def write_output_file(argsRead1, argsRead2, argsCompress, file_name_1, file_name
             file_name_2 = file_name_2 + '.gz'
             compress_gz(file_name_2, output_2, argsOutput)
 
+        #No compression desired
         if argsCompress != True and not argsRead1.endswith('.gz'):
 
             no_compress(file_name_1, output_1, argsOutput)

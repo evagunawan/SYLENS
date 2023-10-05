@@ -6,15 +6,12 @@ import sys
 
 from Bio import SeqIO
 
-from alternative_dictionary_processing import process_alternative_dictionary
+from alternative_dictionary_processing import process_alternative_dictionary, get_key
 from process_paired_end_mistakes import process_mistakes
 from single_end_processing import process_single_end_sampling
 from interleaved_processing import process_interleaved_sampling
 from paired_end_processing import process_paired_end_sampling
 from second_file_format import determine_second_file_format
-from alternative_dictionary_processing import get_key
-
-#Function to create a dictionary, can be used when needed just by importing it
 
 '''
 Class to make a custom FastqFile object. This gives me the ability to make my own 
@@ -243,7 +240,7 @@ class FastqFileData:
 
                 logging.info('File is a single-end file.')
 
-        #If two files are entered, will initially process mistakes, i.e. 2 rev files. If passes mistakes, determines paired end
+        #If two files are entered, will initially process mistakes, i.e. 2 rev files. If passes mistakes, determines if paired end
         if self.paired_file == True:
 
             process_mistakes(self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.formatExpression, self.formatExpression2)
@@ -265,6 +262,7 @@ class FastqFileData:
     #Writing output of determined filetype
     def processing_filetype(self):
 
+        #Calculating percentage, if desired
         def percentage(subsample, dictionary):
 
             logging.debug('Determined number to sample if percentage == True')
