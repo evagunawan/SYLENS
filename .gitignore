@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 =======
 __pycache__/
+process_paired_end_mistakes.py
 subsample_max.py
 Sylens_Classes/
 shapes.py

@@ -7,7 +7,6 @@ import sys
 from Bio import SeqIO
 
 from alternative_dictionary_processing import process_alternative_dictionary, get_key
-from process_paired_end_mistakes import process_mistakes
 from single_end_processing import process_single_end_sampling
 from interleaved_processing import process_interleaved_sampling
 from paired_end_processing import process_paired_end_sampling
@@ -146,7 +145,7 @@ class FastqFileData:
                     #Used to stop processing of two different file formats are found, i.e. for NCBI with rev Illum files
                     if not re.search(self.formatExpression2, self.first_ID_2):
                         
-                        logging.critical('There is an issue with file formats. i.e. two files with two different file formats like NCBI paired with ILlumina or two interleaved files. Program terminating...')
+                        logging.critical('There is an issue with file formats. i.e. two files with two different file formats like NCBI paired with Illumina, two interleaved files, or two forward read files. Program terminating...')
 
                         sys.exit(1)
 
@@ -242,8 +241,6 @@ class FastqFileData:
 
         #If two files are entered, will initially process mistakes, i.e. 2 rev files. If passes mistakes, determines if paired end
         if self.paired_file == True:
-
-            process_mistakes(self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.formatExpression, self.formatExpression2)
 
             if re.search(self.formatExpression, self.first_ID_1) and re.search(self.formatExpression, self.last_ID_1):
 
