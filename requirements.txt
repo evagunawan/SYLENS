@@ -1,0 +1,7 @@
+# Requirements for Sylens with version specificers
+argparse==1.4.0
+random
+sys
+time 
+logging
+re
