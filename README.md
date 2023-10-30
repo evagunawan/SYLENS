@@ -5,6 +5,8 @@
 
 Have ***too*** many reads? It's not a problem anymore!
 
+#DockerCompatible
+
 ## **SUMMARY**
 
 Sylens is a Python program designed to intake **FASTQ** files and user inputs through [**argparse**](https://docs.python.org/3/library/argparse.html) and alter the FASTQ file output with [**Bio.SeqIO**](https://biopython.org/wiki/SeqIO). This program not only allows for file output conversions based on user preferences, but can randomly down sample FASTQ files that have millions of reads based on a user supplied integer or subsampled based on a percentage of reads. 
