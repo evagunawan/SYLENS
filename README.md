@@ -45,7 +45,7 @@ Sylens works by analyzing the ID configuration of the supplied FASTQ file(s). Cu
 
 Sylens requiers **Python 3.8.10** or greater to use. Decompressed and compressed paired-end, single-end, and interleaved FASTQ files are all file types that can be analyzed with Sylens. 
 
-To begin Sylens with a paired-end file use:
+To begin Sylens with a paired-end file in the command line interface, use:
 ```
 Sylens_main.py FILE1.fastq FILE2.fastq
 ```
