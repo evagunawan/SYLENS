@@ -7,6 +7,22 @@ import gzip
 
 from Bio import SeqIO
 
+def create_alternative_dictionary(argsRead, argsFiletype):
+
+    if argsRead.endswith('.gz'):
+            
+        with gzip.open(argsRead, 'rt') as infile: 
+
+            fastqDictionary = SeqIO.to_dict(SeqIO.parse(infile, argsFiletype), key_function = lambda rec : rec.description)
+    
+    else:
+
+        with open(argsRead, 'rt') as infile:
+
+            fastqDictionary = SeqIO.to_dict(SeqIO.parse(infile, argsFiletype), key_function = lambda rec : rec.description)
+
+    return fastqDictionary
+
 #Gets the key from the dictionary and returns it
 def get_key(format1, format_dictionary_2):
 
@@ -81,9 +97,10 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
         
         logging.debug('No read 2')
 
-        #Creates dictionary with description as Key and second dictionary is blank
-        fastqDictionary1 = SeqIO.to_dict(SeqIO.parse(argsRead1, argsFiletype), key_function = lambda rec : rec.description)
+        fastqDictionary1 = create_alternative_dictionary(argsRead1, argsFiletype)
         fastqDictionary2 = {None:None, None:None}
+
+        logging.debug('Finished dictionary with no read 2')
 
         #Gets first and last reads of each dictionary
         first_ID_1 = list(fastqDictionary1) [0]
@@ -93,6 +110,7 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
         last_ID_2 = list(fastqDictionary2) [-1]
 
         logging.debug(f'Formatting new dictionary with new first read 1: {first_ID_1} and new last read 1: {last_ID_1}')
+        logging.debug(f'Second')
 
         #Checks to see if format pattern of file matches a read 2 format, if so terminates 
         for pattern in format_dictionary_2:
@@ -125,7 +143,7 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
         logging.debug('Read 2 detected, creating new dictionary for read 1')
 
         #Creates a dictionary with description as the key
-        fastqDictionary1 = SeqIO.to_dict(SeqIO.parse(argsRead1, argsFiletype), key_function = lambda rec : rec.description)
+        fastqDictionary1 = create_alternative_dictionary(argsRead1, argsFiletype)
         
         #Gets first and last values of dictionary
         first_ID_1 = list(fastqDictionary1) [0]
@@ -152,7 +170,7 @@ def process_alternative_dictionary(argsRead1, argsRead2, argsFiletype, format_di
         #If try fails, will create an alternative dictionary using description as key
         except:
 
-            fastqDictionary2 = SeqIO.to_dict(SeqIO.parse(argsRead2, argsFiletype), key_function = lambda rec : rec.description)
+            fastqDictionary2 = create_alternative_dictionary(argsRead2, argsFiletype)
 
             first_ID_2 = list(fastqDictionary2) [0]
             last_ID_2 = list(fastqDictionary2) [-1]
