@@ -30,7 +30,7 @@ RUN pip3 install argparse \
 # Grabbing Sylens from github
 RUN wget https://github.com/evagunawan/SYLENS/archive/main.tar.gz && \
     tar -xvf main.tar.gz && \
-    rm main.tar.gz
+    rm main.tar.gz 
 
 # Add SYLENS directory to PATH
 ENV PATH="/SYLENS-main:$PATH"
@@ -39,7 +39,7 @@ ENV PATH="/SYLENS-main:$PATH"
 WORKDIR /data
 
 # Running the image, default command if nothing is entered
-CMD ["Sylens_main.py", "--help"]
+CMD ["sylens_main.py", "--help"]
 
 #Testing the image
 FROM app as test
