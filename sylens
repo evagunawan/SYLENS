@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+
+import sylens_main
+
+# Allows for script to be called sylens instead of sylens_main.py 
+# Is the user runing this particular file
+if __name__=='__main__':
+    sylens_main.main()
