@@ -39,7 +39,7 @@ ENV PATH="/SYLENS-main:$PATH"
 WORKDIR /data
 
 # Running the image, default command if nothing is entered
-CMD ["sylens_main.py", "--help"]
+CMD ["sylens", "--help"]
 
 #Testing the image
 FROM app as test
@@ -48,4 +48,4 @@ WORKDIR /test
 
 RUN wget -O sample1_R1.fastq.gz "https://github.com/nf-core/test-datasets/raw/ampliseq/testdata/1_S103_L001_R1_001.fastq.gz"
 
-RUN Sylens_main.py sample1_R1.fastq.gz -s 10
+RUN sylens sample1_R1.fastq.gz -s 10
