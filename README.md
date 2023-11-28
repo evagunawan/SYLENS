@@ -47,52 +47,52 @@ Sylens requiers **Python 3.8.10** or greater to use. Decompressed and compressed
 
 To begin Sylens with a paired-end file in the command line interface, use:
 ```
-Sylens_main.py FILE1.fastq FILE2.fastq
+sylens FILE1.fastq FILE2.fastq
 ```
 
 To begin with a single-end or interleaved file, use:
 ```
-Sylens_main.py INTERLEAVED.fastq
+sylens INTERLEAVED.fastq
 ```
 
 File input type by default is FASTQ. However, if the input file format is not FASTQ, use the flag `-f` or `--filetype` with the input file's correct formatting. Currently Sylens supports FASTQ-sanger, also known as FASTQ format (ASCII 33), and FASTQ-solexa (ASCII 64).
 ```
-Sylens_main.py FILE1.fastq -f fastq-solexa
+sylens FILE1.fastq -f fastq-solexa
 ```
 
 Subsampling with Sylens is done through the `-s` or `--subsample` flag with the desired integer to down sample to.
 ```
-Sylens_main.py FILE1.fastq -s 1000
+sylens FILE1.fastq -s 1000
 ```
 
 By default Sylens will subsample to the exact integer indicated after the `-s` flag. If a percentage is preferred, use the flag `-p` or `--percentage` with the subsample integer to take a percentage of the samples.
 ```
-Sylens_main.py FILE1.fastq -p -s 10
+sylens FILE1.fastq -p -s 10
 ```
 
 Compressing a file on output is done by using the `-c` flag. If a .gz file is input, the output will automatically be .gz. By default, no compression occurs on output.
 ```
-Sylens_main.py FILE1.fastq -c
+sylens FILE1.fastq -c
 ```
 
 By default, files output by Sylens are in sanger FASTQ format. Changing output file formats is done by adding the `-o` or `--output` flag with the output file type you would like to convert to.
 ```
-Sylens_main.py FILE1.fastq -o fastq-solexa
+sylens FILE1.fastq -o fastq-solexa
 ```
 
 For reproducibility, Sylens provides a seed number. To denote a seed generated from a previous run, use the `--seed` flag with the seed number.
 ```
-Sylens_main.py FILE1.fastq --seed 1691696502
+sylens FILE1.fastq --seed 1691696502
 ```
 
 If any additional explanations are needed, use the `-h` or `--help` flag.
 ```
-Sylens_main.py FILE1.fastq --help
+sylens FILE1.fastq --help
 ```
 
 Multiple flags can be utilized in one line of code, if desired. For example, this line of code reproduces the results from a pervious run with a seed = 1691696502 for paired end FASTQ-solexa files, downsamples to 10%, and writes the output to a compressed FASTQ sanger file.
 ```
-Sylens_main.py FILE1.fastq FILE2.fastq -p -s 10 -c --seed 1691696502 -f fastq-solexa -o fastq
+sylens FILE1.fastq FILE2.fastq -p -s 10 -c --seed 1691696502 -f fastq-solexa -o fastq
 ```
 
 ---
