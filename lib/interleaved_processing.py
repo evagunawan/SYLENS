@@ -4,7 +4,7 @@ import logging
 import re 
 import random
 
-from write_output_file import write_interleaved_file
+from lib.write_output_file import write_interleaved_file
 
 def process_interleaved_sampling(argsRead1, argsSubsample, argsOutput, argsCompress, fastqDictionary1, argsSeed, formatExpression, formatExpression2):
 

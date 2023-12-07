@@ -3,7 +3,7 @@ import random
 import logging
 import re
 
-from write_output_file import write_output_file
+from lib.write_output_file import write_output_file
 
 def process_paired_end_sampling(argsRead1, argsRead2, argsSubsample, argsOutput, argsCompress, fastqDictionary1, fastqDictionary2, formatExpression, formatExpression2, argsSeed):
 

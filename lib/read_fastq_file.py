@@ -6,11 +6,11 @@ import sys
 
 from Bio import SeqIO
 
-from alternative_dictionary_processing import process_alternative_dictionary, get_key
-from single_end_processing import process_single_end_sampling
-from interleaved_processing import process_interleaved_sampling
-from paired_end_processing import process_paired_end_sampling
-from second_file_format import determine_second_file_format
+from lib.alternative_dictionary_processing import process_alternative_dictionary, get_key
+from lib.single_end_processing import process_single_end_sampling
+from lib.interleaved_processing import process_interleaved_sampling
+from lib.paired_end_processing import process_paired_end_sampling
+from lib.second_file_format import determine_second_file_format
 
 '''
 Class to make a custom FastqFile object. This gives me the ability to make my own 
