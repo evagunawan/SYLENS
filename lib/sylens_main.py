@@ -50,7 +50,7 @@ def main():
         default = int(time.time()),
         help = 'Enter the seed number if you would like to reproduce previous results. I.E. --seed 1691696502'
         )
-    parser.add_argument('-o', '--output',
+    parser.add_argument('-o', '--outputFormat',
         choices = ['fastq', 'fastq-solexa'],
         default = 'fastq',
         help = "Add what type of fastq file is desired at output. I.E --output fastq-solexa"
@@ -84,7 +84,7 @@ def main():
     logging.debug('Starting processing of file(s)')
 
     #Created fastq file object using the parameters specified in secondary script 
-    fastq_data_object = FastqFileData(args.Read1, args.Read2, args.subsample, args.output, args.compress, args.filetype, args.seed, args.percentage)
+    fastq_data_object = FastqFileData(args.Read1, args.Read2, args.subsample, args.outputFormat, args.compress, args.filetype, args.seed, args.percentage)
 
     #Analyzing fastq_information_object
     logging.debug('Starting reading_fastq_file from main script')

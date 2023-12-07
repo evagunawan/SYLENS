@@ -3,6 +3,8 @@ import gzip
 import logging
 import re 
 import sys
+import tempfile as temp
+import shutil
 
 from Bio import SeqIO
 
@@ -20,39 +22,39 @@ data blueprint. This object can then be applied throughout the main script
 class FastqFileData:
 
     #Creating init class for all the arguments
-    def __init__(self, argsRead1, argsRead2, argsSubsample, argsOutput, argsCompress, argsFiletype, argsSeed, argsPercentage):
+    def __init__(self, Read1Path, Read2Path, SubsampleLevel, OutputFormat, CompressOutput, Filetype, Seed, SubsamplePercentage):
 
-        self.argsRead1 = argsRead1
-        self.argsRead2 = argsRead2
-        self.argsSubsample = argsSubsample
-        self.argsOutput = argsOutput
-        self.argsCompress = argsCompress 
-        self.argsFiletype = argsFiletype   
-        self.argsSeed = argsSeed
-        self.argsPercentage = argsPercentage
+        self.Read1Path = Read1Path
+        self.Read2Path = Read2Path
+        self.SubsampleLevel = SubsampleLevel
+        self.OutputFormat = OutputFormat
+        self.CompressOutput = CompressOutput 
+        self.Filetype = Filetype   
+        self.Seed = Seed
+        self.SubsamplePercentage = SubsamplePercentage
 
     #Setting up function to process fastq file
     def reading_fastq_file(self):
 
         #Creating function to call to create dictionary
-        def create_dictionary(input_file, argsFiletype):
+        def create_dictionary(input_file, Filetype):
 
             if input_file.endswith('.gz'):
             
                 with gzip.open(input_file, 'rt') as infile: 
                 
-                    fastqDictionary = SeqIO.to_dict(SeqIO.parse(infile, argsFiletype)) 
+                    fastqDictionary = SeqIO.to_dict(SeqIO.parse(infile, Filetype)) 
     
             else:
      
                 with open(input_file, 'rt') as infile:        
 
-                    fastqDictionary = SeqIO.to_dict(SeqIO.parse(infile, argsFiletype))
+                    fastqDictionary = SeqIO.to_dict(SeqIO.parse(infile, Filetype))
     
             return fastqDictionary
         
         #If only one file was entered
-        if self.argsRead2 == None:
+        if self.Read2Path == None:
 
             logging.info('Beginning to process one input file.')
 
@@ -60,7 +62,7 @@ class FastqFileData:
             try:
 
                 logging.debug('Beginning Try statement')
-                self.fastqDictionary1 = create_dictionary(self.argsRead1, self.argsFiletype)
+                self.fastqDictionary1 = create_dictionary(self.Read1Path, self.Filetype)
                 self.fastqDictionary2 = {None:None, None:None}
 
             #In cases of interleaved illumina/casava, duplicate keys are created since read # is found in description, will instead create blank dictionaries 
@@ -79,8 +81,8 @@ class FastqFileData:
             try:
 
                 logging.debug('Beginning Try statement')               
-                self.fastqDictionary1 = create_dictionary(self.argsRead1, self.argsFiletype)
-                self.fastqDictionary2 = create_dictionary(self.argsRead2, self.argsFiletype)
+                self.fastqDictionary1 = create_dictionary(self.Read1Path, self.Filetype)
+                self.fastqDictionary2 = create_dictionary(self.Read2Path, self.Filetype)
 
             #In cases where incorrect files were uploaded, i.e. two casava read 2s, this creates blank dict to send to alternative dict process where problem can be identified.
             except ValueError:
@@ -170,14 +172,14 @@ class FastqFileData:
 
                 logging.debug('No format expression was found. Now creating a new dictionary to access file input.')
 
-                self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2 = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
+                self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2 = process_alternative_dictionary(self.Read1Path, self.Read2Path, self.Filetype, format_dictionary, format_dictionary_2)
 
             #If a second file is uploaded and a first ID for that file is found makes sure files have same formatting
             if self.first_ID_2 != None:
 
                 logging.debug('Determine if second file matches first file formatting')
 
-                self.formatExpression2 = determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_2, format_dictionary, format_dictionary_2, self.format)
+                self.formatExpression2 = determine_second_file_format(self.Read2Path, self.Filetype, self.first_ID_2, format_dictionary, format_dictionary_2, self.format)
 
                 logging.debug('Returning self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2')
             
@@ -194,14 +196,14 @@ class FastqFileData:
 
                 logging.debug('TypeError path for dictionary production. Occurs when duplicate keys are made in dictionary from interleaved illumina/casava files.')
 
-                self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2 = process_alternative_dictionary(self.argsRead1, self.argsRead2, self.argsFiletype, format_dictionary, format_dictionary_2)
+                self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2 = process_alternative_dictionary(self.Read1Path, self.Read2Path, self.Filetype, format_dictionary, format_dictionary_2)
  
                 logging.debug('Looking to see if second uploaded file matches the first file format.')
 
             #Checking file format to ensure both files are same file format
             if self.first_ID_2 != None:
 
-                self.formatExpression2 = determine_second_file_format(self.argsRead2, self.argsFiletype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
+                self.formatExpression2 = determine_second_file_format(self.Read2Path, self.Filetype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
 
             logging.debug('Return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2')
 
@@ -212,12 +214,12 @@ class FastqFileData:
 
         logging.debug('Setting up second file expression')
         
-        if self.argsRead2 == None:
+        if self.Read2Path == None:
 
             self.single_file = True
             self.paired_file = False
 
-        if self.argsRead2 != None:
+        if self.Read2Path != None:
 
             self.single_file = False
             self.paired_file = True
@@ -264,32 +266,32 @@ class FastqFileData:
 
             logging.debug('Determined number to sample if percentage == True')
 
-            if self.argsPercentage == True:
+            if self.SubsamplePercentage == True:
 
                 length = len(dictionary)
 
-                self.argsSubsample = int(length) * int(subsample) / int(100)
+                self.SubsampleLevel = int(length) * int(subsample) / int(100)
  
-                self.argsSubsample = int(self.argsSubsample)
+                self.SubsampleLevel = int(self.SubsampleLevel)
 
-                logging.debug(f'Returning self.argsSubsample as {self.argsSubsample}')
+                logging.debug(f'Returning self.SubsampleLevel as {self.SubsampleLevel}')
                 
-                return self.argsSubsample
+                return self.SubsampleLevel
             
             else:
 
                 return subsample
         
-        self.argsSubsample = percentage(self.argsSubsample, self.fastqDictionary1)
+        self.SubsampleLevel = percentage(self.SubsampleLevel, self.fastqDictionary1)
         
         if self.determined_filetype == 'Single-end':
 
-            process_single_end_sampling(self.argsRead1, self.argsRead2, self.argsSubsample, self.argsOutput, self.argsCompress, self.fastqDictionary1, self.argsSeed)
+            process_single_end_sampling(self.Read1Path, self.Read2Path, self.SubsampleLevel, self.OutputFormat, self.CompressOutput, self.fastqDictionary1, self.Seed)
 
         elif self.determined_filetype == 'Interleaved':
 
-            process_interleaved_sampling(self.argsRead1, self.argsSubsample, self.argsOutput, self.argsCompress, self.fastqDictionary1, self.argsSeed, self.formatExpression, self.formatExpression2)
+            process_interleaved_sampling(self.Read1Path, self.SubsampleLevel, self.OutputFormat, self.CompressOutput, self.fastqDictionary1, self.Seed, self.formatExpression, self.formatExpression2)
 
         elif self.determined_filetype == 'Paired-end':
 
-            process_paired_end_sampling(self.argsRead1, self.argsRead2, self.argsSubsample, self.argsOutput, self.argsCompress, self.fastqDictionary1, self.fastqDictionary2, self.formatExpression, self.formatExpression2, self.argsSeed)
+            process_paired_end_sampling(self.Read1Path, self.Read2Path, self.SubsampleLevel, self.OutputFormat, self.CompressOutput, self.fastqDictionary1, self.fastqDictionary2, self.formatExpression, self.formatExpression2, self.Seed)
