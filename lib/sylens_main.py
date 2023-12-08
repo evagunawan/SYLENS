@@ -2,11 +2,11 @@
 
 ###Importing libraries### 
 import argparse
-import random
 import sys 
 import time
 import logging
 
+from lib.subsampling import subsample_single, subsample_paired
 from lib.read_fastq_file import FastqFileData
 
 
@@ -75,31 +75,50 @@ def main():
     seed value is different. If user enters seed value, program will 
     reproduce the same results 
     '''
-    random.seed(args.seed)
+    
 
     logging.info(f"This run's seed number is {args.seed}")
 
     logging.debug('Starting processing of file(s)')
 
     #Created fastq file object using the parameters specified in secondary script 
-    fastq_data_object = FastqFileData(args.Read1, args.Read2, args.subsample, args.outputFormat, args.compress, args.filetype, args.seed, args.percentage)
+    fastq_data_object = FastqFileData(args.Read1, args.Read2, args.filetype)
+
+    #If percentage given determine subsample level
+    if args.percentage:
+        #TODO add code to calculate subsample level for single or paired data
+        pass
+    else:
+        subsample_level = args.subsample
+
+    if fastq_data_object.Interleaved_Read1_IDs:
+        Read1_IDs, Read2_IDs = subsample_paired(
+            fastq_data_object.Interleaved_Read1_IDs,
+            fastq_data_object.Interleaved_Read2_IDs,
+            subsample_level,
+            args.seed
+        )
+        #TODO Write ouput file
+        #write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress)
+
+    elif fastq_data_object.Read2Index:
+        Read1_IDs, Read2_IDs = subsample_paired(
+            list(fastq_data_object.Read1Index.keys()),
+            list(fastq_data_object.Read2Index.keys()),
+            subsample_level,
+            args.seed
+        )
+        #TODO Write ouput file
+        #write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress)
     
-    print(fastq_data_object.Read1Format)
-    print(fastq_data_object.Read2Format)
+    else:
+        Read_IDs = subsample_single(
+            list(fastq_data_object.Read1Index.keys()),
+            subsample_level,
+            args.seed
+        )
+        #TODO Write ouput file
+        #write_reads(fastq_data_object, Read_IDs, None, args.outputFormat, args.compress)
 
     fastq_data_object.cleanUP()
-    
     sys.exit(0)
-
-    logging.debug('Starting determine_Fastq_ID_formatting from main script')
-    fastq_data_object.determine_fastq_ID_formatting()
-
-    logging.debug('Starting determine_paired_single_interleaved from main script')
-    fastq_data_object.determine_paired_single_interleaved()
-
-    logging.debug('Starting processing_filetype from main script')
-    fastq_data_object.processing_filetype()
-
-    logging.info('Sylens has finished processing files. Closing.')
-
-    sys.exit()
