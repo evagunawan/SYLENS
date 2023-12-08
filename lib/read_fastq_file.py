@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
 import gzip
 import logging
 import re 
 import sys
-import tempfile as temp
+import uuid
 import shutil
+import os
 
 from Bio import SeqIO
 
@@ -12,7 +12,8 @@ from lib.alternative_dictionary_processing import process_alternative_dictionary
 from lib.single_end_processing import process_single_end_sampling
 from lib.interleaved_processing import process_interleaved_sampling
 from lib.paired_end_processing import process_paired_end_sampling
-from lib.second_file_format import determine_second_file_format
+
+from lib.fastq_format_check import determine_fastq_ID_formatting
 
 '''
 Class to make a custom FastqFile object. This gives me the ability to make my own 
@@ -20,6 +21,15 @@ data blueprint. This object can then be applied throughout the main script
 '''
 
 class FastqFileData:
+
+    Read1Temp = None
+    Read2Temp = None
+
+    Read1Index = None
+    Read2Index = None
+
+    Read1Format = None
+    Read2Format = None
 
     #Creating init class for all the arguments
     def __init__(self, Read1Path, Read2Path, SubsampleLevel, OutputFormat, CompressOutput, Filetype, Seed, SubsamplePercentage):
@@ -33,181 +43,94 @@ class FastqFileData:
         self.Seed = Seed
         self.SubsamplePercentage = SubsamplePercentage
 
-    #Setting up function to process fastq file
-    def reading_fastq_file(self):
+        ####
+        #### If files are compressed create temp files and decompress gzip into temp files
+        ####
 
-        #Creating function to call to create dictionary
-        def create_dictionary(input_file, Filetype):
-
-            if input_file.endswith('.gz'):
+        if self.Read1Path and self.Read1Path.endswith('.gz'):
             
-                with gzip.open(input_file, 'rt') as infile: 
-                
-                    fastqDictionary = SeqIO.to_dict(SeqIO.parse(infile, Filetype)) 
-    
-            else:
-     
-                with open(input_file, 'rt') as infile:        
-
-                    fastqDictionary = SeqIO.to_dict(SeqIO.parse(infile, Filetype))
-    
-            return fastqDictionary
+            logging.debug(f"Decompressing Read1 {self.Read1Path}")
+            
+            self.Read1Temp = uuid.uuid4().hex
+            with open(self.Read1Temp, "wb") as tmp:
+                shutil.copyfileobj(gzip.open(self.Read1Path), tmp)
         
-        #If only one file was entered
-        if self.Read2Path == None:
+        if self.Read2Path and self.Read2Path.endswith('.gz'):
 
-            logging.info('Beginning to process one input file.')
+            logging.debug(f"Decompressing Read2 {self.Read2Path}")
 
-            #Made exception. First, try creating a dictionary. With single illumina/casava files, dictionary will be created but will not have read number 
-            try:
+            self.Read2Temp = uuid.uuid4().hex
+            with open(self.Read2Temp, "wb") as tmp:
+                shutil.copyfileobj(gzip.open(self.Read2Path), tmp)
 
-                logging.debug('Beginning Try statement')
-                self.fastqDictionary1 = create_dictionary(self.Read1Path, self.Filetype)
-                self.fastqDictionary2 = {None:None, None:None}
 
-            #In cases of interleaved illumina/casava, duplicate keys are created since read # is found in description, will instead create blank dictionaries 
-            except ValueError:
 
-                logging.debug('Beginning ValueError statement')
-                self.fastqDictionary1 = {None:None, None:None}
-                self.fastqDictionary2 = {None:None, None:None}
 
-        #If two files are entered
+        ####
+        #### Creating fastq index
+        ####
+
+        logging.info(f"Creating Read Indexes")
+        
+        # Read 1
+        logging.debug('Beginning to index read 1.')
+        if self.Read1Temp:
+            logging.debug('Read 1 was compressed, indexing temp file.')
+            self.Read1Index = SeqIO.index(self.Read1Temp, Filetype)
+        
+        elif self.Read1Path:
+            logging.debug('Indexing read 1.')
+            self.Read1Index = SeqIO.index(self.Read1Path, Filetype)
+        
         else:
+            logging.error('Missing read 1.')
+            sys.exit(1)
 
-            logging.info('Beginning to process two input files.')
+        # Read 2
+        logging.debug('Beginning to index read 2 (if we have it).')
+        if self.Read2Temp:
+            logging.debug('Read 2 was compressed, indexing temp file.')
+            self.Read2Index = SeqIO.index(self.Read2Temp, Filetype)
+        
+        elif self.Read2Path:
+            logging.debug('Indexing read 2.')
+            self.Read2Index = SeqIO.index(self.Read2Path, Filetype)
+        
+        else:
+            logging.debug('Read 2 not found, continuing.')
 
-            #Made exception. First try making a dict. If illumina/casava both dict will have same keys, but read number is found in description
-            try:
 
-                logging.debug('Beginning Try statement')               
-                self.fastqDictionary1 = create_dictionary(self.Read1Path, self.Filetype)
-                self.fastqDictionary2 = create_dictionary(self.Read2Path, self.Filetype)
 
-            #In cases where incorrect files were uploaded, i.e. two casava read 2s, this creates blank dict to send to alternative dict process where problem can be identified.
-            except ValueError:
+        
+        ####
+        #### Get Fastq formats
+        ####
 
-                logging.debug('Beginning ValueError statement')
-                self.fastqDictionary1 = {None:None, None:None}
-                self.fastqDictionary2 = {None:None, None:None}
+        if self.Read1Index:
+            logging.debug('Getting read 1 fastq format.')
+            self.Read1Format = determine_fastq_ID_formatting(self.Read1Index)
 
-        logging.debug('Returning fastqDictionary1 and fastqDictionary2')
+        if self.Read2Index:
+            logging.debug('Getting read 2 fastq format.')
+            self.Read2Format = determine_fastq_ID_formatting(self.Read2Index)
+    
+    
+    
+    
+    ####
+    #### Clean up function to delete temp files after completion
+    ####
+    def cleanUP(self):
+        logging.info("Cleaning Temp Files.")
 
-        return self.fastqDictionary1, self.fastqDictionary2
+        if self.Read1Temp:
+            os.remove(self.Read1Temp)
 
-    #Determining format of fastq file to properly figure out if R1 and/or R2
-    def determine_fastq_ID_formatting(self):
+        if self.Read2Temp:
+            os.remove(self.Read2Temp)
 
-        #Taking the top 3 known formats and creating regular expressions to identify IDs. Stored REs in a dictinoary 
-        # Illumina and Casava have same format, for now.
-        format_dictionary = {
-            '(^SRR)(\w+)[.+](\d+)[.+](1)': 'NCBI',
-            '(.+)(\d) (1)' :'IlluminaAndCasava'
-            }
 
-        format_dictionary_2 = {
-            '(^SRR)(\w+)[.+](\d+)[.+](2)': 'NCBI',
-            '(.+)(\d) (2)' :'IlluminaAndCasava'
-            }
-
-        self.formatExpression = None
-        self.format = None
-
-        completed = False
-
-        #Grabbing first and last IDs from the input file dictionaries
-        self.first_ID_1 = list(self.fastqDictionary1) [0]
-        self.last_ID_1 = list(self.fastqDictionary1) [-1]
-
-        self.first_ID_2 = list(self.fastqDictionary2) [0]
-        self.last_ID_2 = list(self.fastqDictionary2) [-1]        
-
-        logging.debug(f'Acquired first and last IDs: {self.first_ID_1}, {self.last_ID_1}, {self.first_ID_2}, {self.last_ID_2}')
-
-        #Exception to first try finding a pattern in first_ID. This should find a pattern in any NCBI fomatted file
-        try:
-
-            logging.debug('Starting try statment in determine fastq ID formatting')
-
-            for pattern in format_dictionary:
-
-                #If re finds pattern in dictionary with read 1 IDs saves format and expression
-                if re.search(pattern, self.first_ID_1):
-
-                    self.formatExpression = pattern
-
-                    self.format = format_dictionary[pattern]
-
-                    logging.debug(f'Regular expression found fastq ID format is {self.formatExpression}')                
-
-                    completed = True
-
-                    self.formatExpression2 = get_key(self.format, format_dictionary_2)
-                    
-                    #Used to stop processing of two different file formats are found, i.e. for NCBI with rev Illum files
-                    if not re.search(self.formatExpression2, self.first_ID_2):
-                        
-                        logging.critical('There is an issue with file formats. i.e. two files with two different file formats like NCBI paired with Illumina, two interleaved files, or two forward read files. Program terminating...')
-
-                        sys.exit(1)
-
-                    logging.debug('Returning self.formatExpression and self.formatExpression2')
-
-                    return self.formatExpression, self.formatExpression2
-
-                #If a pattern cannot be found in forward dictionary
-                else:
-
-                    #Added an error to catch read 2 file instead of read 1 or interleaved file
-                    for pattern in format_dictionary_2:
-
-                        if re.search(pattern, self.first_ID_1):
-
-                            logging.critical('Required positional file appears to be a reverse read file. Positional file should be a forward read or interleaved file. Program terminating...')
-
-                            sys.exit(1)  
-
-            #If a dictionary was created for a file but a pattern is not found because the read ID was found in the description, feeds into alternative dictionary
-            if completed == False:
-
-                logging.debug('No format expression was found. Now creating a new dictionary to access file input.')
-
-                self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2 = process_alternative_dictionary(self.Read1Path, self.Read2Path, self.Filetype, format_dictionary, format_dictionary_2)
-
-            #If a second file is uploaded and a first ID for that file is found makes sure files have same formatting
-            if self.first_ID_2 != None:
-
-                logging.debug('Determine if second file matches first file formatting')
-
-                self.formatExpression2 = determine_second_file_format(self.Read2Path, self.Filetype, self.first_ID_2, format_dictionary, format_dictionary_2, self.format)
-
-                logging.debug('Returning self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2')
-            
-            return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2
-
-        #Creates a dictionary with keys that are the descriptions. Occurs if dictionary is made from an interleaved illumina/casava file and has no matches which creates a TypeError 
-        except TypeError:
-
-            if self.format != None:
-
-                pass
-            
-            else:
-
-                logging.debug('TypeError path for dictionary production. Occurs when duplicate keys are made in dictionary from interleaved illumina/casava files.')
-
-                self.fastqDictionary1, self.fastqDictionary2, self.first_ID_1, self.last_ID_1, self.first_ID_2, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2 = process_alternative_dictionary(self.Read1Path, self.Read2Path, self.Filetype, format_dictionary, format_dictionary_2)
- 
-                logging.debug('Looking to see if second uploaded file matches the first file format.')
-
-            #Checking file format to ensure both files are same file format
-            if self.first_ID_2 != None:
-
-                self.formatExpression2 = determine_second_file_format(self.Read2Path, self.Filetype, self.first_ID_1, format_dictionary, format_dictionary_2, self.format)
-
-            logging.debug('Return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2')
-
-            return self.first_ID_1, self.first_ID_2, self.last_ID_1, self.last_ID_2, self.format, self.formatExpression, self.formatExpression2, self.fastqDictionary1, self.fastqDictionary2
+    
 
     #Figures out if input file is single, paired, or interleaved
     def determine_paired_single_interleaved(self):

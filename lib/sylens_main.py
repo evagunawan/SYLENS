@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 #SYLENS: Sampling Yielding LEss Noticeable Samples
 
 ###Importing libraries### 
@@ -85,10 +83,13 @@ def main():
 
     #Created fastq file object using the parameters specified in secondary script 
     fastq_data_object = FastqFileData(args.Read1, args.Read2, args.subsample, args.outputFormat, args.compress, args.filetype, args.seed, args.percentage)
+    
+    print(fastq_data_object.Read1Format)
+    print(fastq_data_object.Read2Format)
 
-    #Analyzing fastq_information_object
-    logging.debug('Starting reading_fastq_file from main script')
-    fastq_data_object.reading_fastq_file()
+    fastq_data_object.cleanUP()
+    
+    sys.exit(0)
 
     logging.debug('Starting determine_Fastq_ID_formatting from main script')
     fastq_data_object.determine_fastq_ID_formatting()
