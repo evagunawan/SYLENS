@@ -1,6 +1,3 @@
-import re
-
-from io import BytesIO
 from io import StringIO
 
 from Bio.File import _open_for_random_access
