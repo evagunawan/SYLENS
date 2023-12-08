@@ -1,6 +1,5 @@
 import gzip
 import logging
-import re 
 import sys
 import uuid
 import shutil
