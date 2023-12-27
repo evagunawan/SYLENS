@@ -6,3 +6,6 @@ how_to_use.txt
 *.fasta
 *.fastq
 *.gz
+.nextflow*
+main.nf
+work/
