@@ -121,7 +121,7 @@ Find a bug? Let me know! I'm still learning so any additional guidance, comments
 
 ## **Known Issues**
 
-None, at the moment! But if you find one, please refer to "Bug Reporting".
+Sylens is not currently optimized and overuses memory. We are in the process of refactoring this behavior and will perform a new release when finished.
 
 ---
 ## **AUTHORS**
