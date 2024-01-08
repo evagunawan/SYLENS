@@ -50,6 +50,7 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, Compression, o
         if fastq_object.Read1Path.endswith(".gz") or Compression == True:
             
             write_compressed(file_name_1, sequences_to_write, outputFormat)
+
         else:
             
             write_not_compressed(file_name_1, sequences_to_write, outputFormat)
@@ -148,9 +149,7 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, Compression, o
             
             logging.info(f"Writing to {file_name}")
 
-                    
-        
-    logging.debug("Finished processing, Sylens out.")
+    logging.info("Finished processing, Sylens exiting.")
 
 
 
