@@ -1,15 +1,14 @@
-#!/usr/bin/env python3
-
 #SYLENS: Sampling Yielding LEss Noticeable Samples
 
 ###Importing libraries### 
 import argparse
-import random
 import sys 
 import time
 import logging
 
-from read_fastq_file import FastqFileData
+from lib.subsampling import subsample_single, subsample_paired
+from lib.read_fastq_file import FastqFileData
+from lib.write_output_file import write_reads
 
 
 # Creating class that displays help if no information is entered in parser and changes how the error is displayed when something is entered wrong
@@ -50,7 +49,7 @@ def main():
         default = int(time.time()),
         help = 'Enter the seed number if you would like to reproduce previous results. I.E. --seed 1691696502'
         )
-    parser.add_argument('-o', '--output',
+    parser.add_argument('-o', '--outputFormat',
         choices = ['fastq', 'fastq-solexa'],
         default = 'fastq',
         help = "Add what type of fastq file is desired at output. I.E --output fastq-solexa"
@@ -65,40 +64,82 @@ def main():
         action = 'store_true',
         help = "With the -p flag, subsampling is done as a percentage of reads instead of an indicated number of reads. Percentage of reads should be an integer between 1-100. I.E. -p -s 15"
         )
+    parser.add_argument('--output_type',
+        choices = ['separate', 'joined', 'interleaved'],
+        default = 'separate',
+        help = "While writing the output file for interleaved and paired end files, output can be written with all R1 reads first and all R2 reads after (joined), written in different files (separate), or written with R1 first and R2 second for every read (interleaved). By default the output of interleaved files will be interleaved."
+        )
 
     #Runs the parser and allows you to call arguments downstream
     args = parser.parse_args()
 
     #Format for logging debug-critical information
-    logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
+    logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
+
+    #Creating file output name
+    if args.subsample:
+        file_naming_convention_1 = f'{args.seed}_downsampled_{args.Read1}'
+        if args.Read2 != None:
+            file_naming_convention_2 = f'{args.seed}_downsampled_{args.Read2}'
+        else:
+            file_naming_convention_2 = None
+
+    else:
+        file_naming_convention_1 = f'non_downsampled_{args.Read1}'    
+        if args.Read2 != None:    
+            file_naming_convention_2 = f'non_downsampled_{args.Read2}'  
+        else:
+            file_naming_convention_2 = None
+
 
     '''
-    Set seed value to time since epoch that way each time program is run, 
+    Set seed value to time since e`poch that way each time program is run, 
     seed value is different. If user enters seed value, program will 
     reproduce the same results 
     '''
-    random.seed(args.seed)
-
+    
     logging.info(f"This run's seed number is {args.seed}")
 
     logging.debug('Starting processing of file(s)')
 
     #Created fastq file object using the parameters specified in secondary script 
-    fastq_data_object = FastqFileData(args.Read1, args.Read2, args.subsample, args.output, args.compress, args.filetype, args.seed, args.percentage)
+    fastq_data_object = FastqFileData(args.Read1, args.Read2, args.filetype)
 
-    #Analyzing fastq_information_object
-    logging.debug('Starting reading_fastq_file from main script')
-    fastq_data_object.reading_fastq_file()
+    #If percentage given determine subsample level
+    if args.percentage:
+        subsample_level = int((fastq_data_object.R1_Total_Reads)*(args.subsample) / (100))
 
-    logging.debug('Starting determine_Fastq_ID_formatting from main script')
-    fastq_data_object.determine_fastq_ID_formatting()
+    else:
+        subsample_level = args.subsample
 
-    logging.debug('Starting determine_paired_single_interleaved from main script')
-    fastq_data_object.determine_paired_single_interleaved()
+    if fastq_data_object.Interleaved_Read1_IDs:
+        Read1_IDs, Read2_IDs = subsample_paired(
+            fastq_data_object.Interleaved_Read1_IDs,
+            fastq_data_object.Interleaved_Read2_IDs,
+            subsample_level,
+            args.seed
+        )
+        #TODO Write ouput file
+        write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2)
 
-    logging.debug('Starting processing_filetype from main script')
-    fastq_data_object.processing_filetype()
+    elif fastq_data_object.Read2Index:
+        Read1_IDs, Read2_IDs = subsample_paired(
+            list(fastq_data_object.Read1Index.keys()),
+            list(fastq_data_object.Read2Index.keys()),
+            subsample_level,
+            args.seed
+        )
+        #TODO Write ouput file
+        write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2)
+    
+    else:
+        Read_IDs = subsample_single(
+            list(fastq_data_object.Read1Index.keys()),
+            subsample_level,
+            args.seed
+        )
+        #TODO Write ouput file
+        write_reads(fastq_data_object, Read_IDs, None, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2)
 
-    logging.info('Sylens has finished processing files. Closing.')
-
-    sys.exit()
+    fastq_data_object.cleanUP()
+    sys.exit(0)
