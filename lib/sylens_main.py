@@ -108,6 +108,7 @@ def main():
     #If percentage given determine subsample level
     if args.percentage:
         subsample_level = int((fastq_data_object.R1_Total_Reads)*(args.subsample) / (100))
+        logging.debug(f'The amount to subsample is: {subsample_level}')
 
     else:
         subsample_level = args.subsample
@@ -120,7 +121,7 @@ def main():
             args.seed
         )
         #TODO Write ouput file
-        write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2)
+        write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2, args.filetype)
 
     elif fastq_data_object.Read2Index:
         Read1_IDs, Read2_IDs = subsample_paired(
@@ -130,7 +131,7 @@ def main():
             args.seed
         )
         #TODO Write ouput file
-        write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2)
+        write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2, args.filetype)
     
     else:
         Read_IDs = subsample_single(
@@ -139,7 +140,7 @@ def main():
             args.seed
         )
         #TODO Write ouput file
-        write_reads(fastq_data_object, Read_IDs, None, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2)
+        write_reads(fastq_data_object, Read_IDs, None, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2, args.filetype)
 
     fastq_data_object.cleanUP()
     sys.exit(0)
