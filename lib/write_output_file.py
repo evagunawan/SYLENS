@@ -1,28 +1,22 @@
 #!/usr/bin/env python3
 import gzip
 import logging
-import sys
-import re
 
 from Bio import SeqIO
 
 def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, outputType, file_name_1, file_name_2, input_type):
-    
+
     def get_seq_from_IDs(input_fastq, id_list, input_type):
 
         logging.debug(f'Getting sequences from {input_fastq}')
-
         seq_records = []
-        
-        for each_ID in id_list:
 
-            each_ID = each_ID.split()[0]
+        # Using list comprehension to extract just the prefix of the id for every id in the id list
+        id_prefix = [each_ID.split()[0] for each_ID in id_list]
 
-            for record in SeqIO.parse(input_fastq, input_type):
-
-                if re.search(each_ID, record.id):
-
-                    seq_records.append(record)
+        for record in SeqIO.parse(input_fastq, input_type):
+            if record.id in id_prefix:
+                seq_records.append(record)
 
         logging.debug(f'Finished getting sequences from {input_fastq}')
         return seq_records
@@ -41,7 +35,7 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, o
 
             with gzip.open(f'{file_name}', 'wt') as IDs_Seq_File: 
 
-                SeqIO.write(sequences, IDs_Seq_File, outputFormat)
+                SeqIO.write(sequences.values(), IDs_Seq_File, outputFormat)
 
         else:
 
