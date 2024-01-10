@@ -24,6 +24,7 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, o
 
     def write_output(file_name, sequences, outputFormat, compression):
 
+        logging.debug(f"Writing output to f{file_name}")
         if compression or fastq_object.Read1Path.endswith(".gz"):
 
             if fastq_object.Read1Path.endswith(".gz"):
@@ -36,7 +37,7 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, o
 
             with gzip.open(f'{file_name}', 'wt') as IDs_Seq_File: 
 
-                SeqIO.write(sequences.values(), IDs_Seq_File, outputFormat)
+                SeqIO.write(sequences, IDs_Seq_File, outputFormat)
 
         else:
 

@@ -74,7 +74,7 @@ def main():
     args = parser.parse_args()
 
     #Format for logging debug-critical information
-    logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
+    logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
 
     #Creating file output name
     if args.subsample:
