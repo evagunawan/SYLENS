@@ -23,7 +23,7 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, o
 
     def write_output(file_name, sequences, outputFormat, compression):
 
-        logging.debug(f"Writing output to f{file_name}")
+        logging.debug(f"Writing output to {file_name}")
 
         if compression or fastq_object.Read1Path.endswith(".gz"):
             if fastq_object.Read1Path.endswith(".gz"):
@@ -71,18 +71,34 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, o
     else:
         
         logging.debug("Processing interleaved/paired end file(s)")
-        
-        if fastq_object.Read1Temp:
-            sequences_to_write_1 = get_seq_from_IDs(fastq_object.Read1Temp, Read1_IDs, input_type)
 
-        else:
-            sequences_to_write_1 = get_seq_from_IDs(fastq_object.Read1Path, Read1_IDs, input_type)
+        # For interleaved processing        
+        if fastq_object.Interleaved_Read1_IDs != None and fastq_object.Interleaved_Read2_IDs != None:
+            if fastq_object.Read1Temp:
+                sequences_to_write_1 = get_seq_from_IDs(fastq_object.Read1Temp, Read1_IDs, input_type)
+                sequences_to_write_2 = get_seq_from_IDs(fastq_object.Read1Temp, Read2_IDs, input_type)
+            else:
+                sequences_to_write_1 = get_seq_from_IDs(fastq_object.Read1Path, Read1_IDs, input_type)
+                sequences_to_write_2 = get_seq_from_IDs(fastq_object.Read1Path, Read2_IDs, input_type)
+            if outputType == "separate":
+                file_name_2 = file_name_1.split(".")[0] + "_Read_2.fastq"
+                file_name_1 = file_name_1.split(".")[0] + "_Read_1.fastq"
+            if compression or fastq_object.Read1Path.endswith('.gz'):
+                file_name_1 += ".gz"
+                file_name_2 += ".gz"
+                    
 
-        if fastq_object.Read2Temp:
-            sequences_to_write_2 = get_seq_from_IDs(fastq_object.Read2Temp, Read2_IDs, input_type)
+        # For paired end processing
+        if fastq_object.Interleaved_Read1_IDs == None and fastq_object.Interleaved_Read2_IDs == None:
+            if fastq_object.Read1Temp:
+                sequences_to_write_1 = get_seq_from_IDs(fastq_object.Read1Temp, Read1_IDs, input_type)
+            else:
+                sequences_to_write_1 = get_seq_from_IDs(fastq_object.Read1Path, Read1_IDs, input_type)
 
-        else:
-            sequences_to_write_2 = get_seq_from_IDs(fastq_object.Read2Path, Read2_IDs, input_type)
+            if fastq_object.Read2Temp:
+                sequences_to_write_2 = get_seq_from_IDs(fastq_object.Read2Temp, Read2_IDs, input_type)
+            else:
+                sequences_to_write_2 = get_seq_from_IDs(fastq_object.Read2Path, Read2_IDs, input_type)
         
         if outputType == "separate":
 
