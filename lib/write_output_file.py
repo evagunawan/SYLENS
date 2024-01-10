@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import gzip
 import logging
-from collections import OrderedDict
 
 from Bio import SeqIO
 
@@ -10,9 +9,9 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, o
     def get_seq_from_IDs(input_fastq, id_list, input_type):
 
         logging.debug(f'Getting sequences from {input_fastq}')
-        seq_records = OrderedDict()
+        seq_records = {}
 
-        # Using list comprehension to extract just the prefix of the id for every id in the id list
+        # Using set comprehension to extract just the prefix of the id for every id in the id list
         id_set = set(each_ID.split()[0] for each_ID in id_list)
 
         for record in SeqIO.parse(input_fastq, input_type):
