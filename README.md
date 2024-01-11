@@ -70,7 +70,7 @@ By default Sylens will subsample to the exact integer indicated after the `-s` f
 sylens FILE1.fastq -p -s 10
 ```
 
-Compressing a file on output is done by using the `-c` flag. If a .gz file is input, the output will automatically be .gz. By default, no compression occurs on output.
+Compressing a file on output is done by using the `-c` or `--compression` flag. If a .gz file is input, the output will automatically be .gz. By default, no compression occurs on output.
 ```
 sylens FILE1.fastq -c
 ```
@@ -126,7 +126,7 @@ Find a bug? Let me know! I'm still learning so any additional guidance, comments
 
 ## **Known Issues**
 
-Sylens is not currently optimized and overuses memory. We are in the process of refactoring this behavior and will perform a new release when finished.
+None at the moment.
 
 ---
 ## **AUTHORS**
