@@ -83,9 +83,9 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, o
             if outputType == "separate":
                 file_name_2 = file_name_1.split(".")[0] + "_Read_2.fastq"
                 file_name_1 = file_name_1.split(".")[0] + "_Read_1.fastq"
-            if compression or fastq_object.Read1Path.endswith('.gz'):
-                file_name_1 += ".gz"
-                file_name_2 += ".gz"
+                if compression or fastq_object.Read1Path.endswith('.gz'):
+                    file_name_1 += ".gz"
+                    file_name_2 += ".gz"
                     
 
         # For paired end processing
