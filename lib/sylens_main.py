@@ -67,7 +67,7 @@ def main():
     parser.add_argument('--output_type',
         choices = ['separate', 'joined', 'interleaved'],
         default = 'separate',
-        help = "While writing the output file for interleaved and paired end files, output can be written with all R1 reads first and all R2 reads after (joined), written in different files (separate), or written with R1 first and R2 second for every read (interleaved). By default the output of interleaved files will be interleaved."
+        help = "While writing the output file for interleaved and paired end files, output can be written with all R1 reads first and all R2 reads after (joined), written in different files (separate), or written with an alternating R1 first and R2 second pattern (interleaved). By default the output will be separate."
         )
 
     #Runs the parser and allows you to call arguments downstream

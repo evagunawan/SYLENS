@@ -34,7 +34,7 @@ Authors
 
 ![Sylens Program Map](Assets/Program_Map_Sylens.PNG)
 
-Sylens works by analyzing the ID configuration of the supplied FASTQ file(s). Currently, Sylens can analyze NCBI, Illumina, and Casava formatted FASTQ files. The program then determines if the input file is an interleaved or single end file. If two files are input, Sylens will ensure that the required positional file is a forward file and the second file is a reverse file. If subsampling is desired, it will randomly subsample the FASTQ files and generate a seed for the run. This seed can be used to reproduce results, if desired. File formatting can be converted to and from ASCII 64 (FASTQ-solexa) and ASCII 33 (sanger) formats. The files can be written in both compressed and uncompressed format. 
+Sylens works by analyzing the ID configuration of the supplied FASTQ file(s). Currently, Sylens can analyze NCBI, Illumina, and Casava formatted FASTQ files. The program then determines if the input file is an interleaved or single end file. If subsampling is desired, it will randomly subsample the FASTQ files and generate a seed for the run. This seed can be used to reproduce results, if desired. File formatting can be converted to and from ASCII 64 (FASTQ-solexa) and ASCII 33 (sanger) formats. The files can be written in both compressed and uncompressed format. 
 
 ### **Legend**
 ![Sylens Legend](Assets/legend_Sylens.PNG)
@@ -70,7 +70,7 @@ By default Sylens will subsample to the exact integer indicated after the `-s` f
 sylens FILE1.fastq -p -s 10
 ```
 
-Compressing a file on output is done by using the `-c` flag. If a .gz file is input, the output will automatically be .gz. By default, no compression occurs on output.
+Compressing a file on output is done by using the `-c` or `--compression` flag. If a .gz file is input, the output will automatically be .gz. By default, no compression occurs on output.
 ```
 sylens FILE1.fastq -c
 ```
@@ -80,9 +80,9 @@ By default, files output by Sylens are in sanger FASTQ format. Changing output f
 sylens FILE1.fastq -o fastq-solexa
 ```
 
-For reproducibility, Sylens provides a seed number. To denote a seed generated from a previous run, use the `--seed` flag with the seed number.
+For reproducibility, Sylens provides a seed number. To denote a seed generated from a previous run, use the `--seed` flag with the seed number as well as the previously entered subsampling information. If applicable, entered the input and output filetypes. 
 ```
-sylens FILE1.fastq --seed 1691696502
+sylens FILE1.fastq --seed 1691696502 -s 1000 -f fastq-solexa -o fastq
 ```
 
 If any additional explanations are needed, use the `-h` or `--help` flag.
@@ -90,9 +90,14 @@ If any additional explanations are needed, use the `-h` or `--help` flag.
 sylens FILE1.fastq --help
 ```
 
-Multiple flags can be utilized in one line of code, if desired. For example, this line of code reproduces the results from a pervious run with a seed = 1691696502 for paired end FASTQ-solexa files, downsamples to 10%, and writes the output to a compressed FASTQ sanger file.
+If entering an interleaved file or pair end files, the way the output is written can be changed with `--output_type`. Currently there are 3 written output types: separate, joined, and interleaved. Separate produces two files, a read 1 and read 2. Joined produces one file with all read 1 entries first and all read 2 entries second. Interleaved produces an alternating pattern of read 1 and read 2 in one file. By default, files are separated.   
 ```
-sylens FILE1.fastq FILE2.fastq -p -s 10 -c --seed 1691696502 -f fastq-solexa -o fastq
+sylens INTERLEAVED.fastq --output_type interleaved
+```
+
+Multiple flags can be utilized in one line of code, if desired. For example, this line of code reproduces the results from a previous run with a seed = 1691696502 for paired end FASTQ-solexa files, downsamples to 10%, and writes the output in one compressed FASTQ sanger file with all read 1 entries first and read 2 entries last.
+```
+sylens FILE1.fastq FILE2.fastq -p -s 10 -c --seed 1691696502 -f fastq-solexa -o fastq --output_type joined
 ```
 
 ---
@@ -121,7 +126,7 @@ Find a bug? Let me know! I'm still learning so any additional guidance, comments
 
 ## **Known Issues**
 
-Sylens is not currently optimized and overuses memory. We are in the process of refactoring this behavior and will perform a new release when finished.
+None at the moment.
 
 ---
 ## **AUTHORS**
