@@ -100,6 +100,11 @@ Multiple flags can be utilized in one line of code, if desired. For example, thi
 sylens FILE1.fastq FILE2.fastq -p -s 10 -c --seed 1691696502 -f fastq-solexa -o fastq --output_type joined
 ```
 
+If no downsampling is desired combining the subsample and percentage flags like so, `-p -s 100`, will give the ability to not downsample but change the written output. In this example the fastq-solexa interleaved file will not be downsampled and will be written as a sanger fastq file with all read 1 entries first and all read 2 entries second in one file.
+```
+sylens INTERLEAVED.fastq -p -s 100 -f fastq-sanger -o fastq --output_type joined
+```
+
 ---
 
 ## **OUTPUT**
