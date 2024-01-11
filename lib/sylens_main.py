@@ -84,7 +84,7 @@ def main():
         else:
             file_naming_convention_2 = None
 
-    else:
+    if args.subsample == 100 and args.percentage:
         file_naming_convention_1 = f'non_downsampled_{args.Read1}'    
         if args.Read2 != None:    
             file_naming_convention_2 = f'non_downsampled_{args.Read2}'  
