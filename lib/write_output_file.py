@@ -3,6 +3,7 @@ import gzip
 import logging
 
 from Bio import SeqIO
+import lib.fastq_format_check
 
 def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, outputType, file_name_1, file_name_2, input_type):
 
@@ -11,9 +12,18 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, o
         logging.debug(f'Getting sequences from {input_fastq}')
         seq_records = {}
 
-        # Using set comprehension to extract just the prefix of the id for every id in the id list
+        # Using comprehension to extract just the prefix of the id for every id in the id list
+        # if lib.fastq_format_check.determine_fastq_ID_formatting == "IlluminaAndCasava":
+        #     id_set = set(each_ID.split() for each_ID in id_list)
+        # else:
+        #     
         id_set = set(each_ID.split()[0] for each_ID in id_list)
 
+# This works better for smaller datasets instead of larger datasets 
+# Reframe how to think about this: want to keep one read in memory at a time!
+# Write them immediately after gathering them one by one instead of storing all in memory 
+# SeqIO.Index function, read1index dictionary like 
+# Just use index and read IDs and output file style 
         for record in SeqIO.parse(input_fastq, input_type):
             if record.id in id_set:
                 seq_records[record.id] = record
@@ -143,4 +153,10 @@ def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, o
 
             logging.info(f"Finished writing to output: {file_name}")
 
+    
+    for item in Read1_IDs:
+        print(fastq_object.Read1Index[item].id)
+        print(fastq_object.Read1Index[item].seq)
+        print(fastq_object.Read1Index[item].format('fastq'))
+        
     logging.info("Finished processing, Sylens exiting.")

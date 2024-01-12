@@ -35,6 +35,7 @@ def main():
         nargs = '?',
         help = 'Add additional FASTQ file here if paired-end. I.E. R2.fastq'
         )
+    # Change to show that if you use -p flag will switch to percentage
     parser.add_argument('-s','--subsample', 
         type = int,
         help = 'Enter an integer which will be the total number of down sampling of FASTQ files occuring. Leave blank if no subsampling is desired and file conversion is needed. I.E. --subsample 10000.'
@@ -74,9 +75,13 @@ def main():
     args = parser.parse_args()
 
     #Format for logging debug-critical information
-    logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
+    logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
 
     #Creating file output name
+    if args.subsample == None:
+        args.subsample == 100
+        args.percentage == True
+
     if args.subsample:
         file_naming_convention_1 = f'{args.seed}_downsampled_{args.Read1}'
         if args.Read2 != None:
@@ -90,6 +95,7 @@ def main():
             file_naming_convention_2 = f'non_downsampled_{args.Read2}'  
         else:
             file_naming_convention_2 = None
+    
 
 
     '''
@@ -112,7 +118,7 @@ def main():
 
     else:
         subsample_level = args.subsample
-
+# interleaved
     if fastq_data_object.Interleaved_Read1_IDs:
         Read1_IDs, Read2_IDs = subsample_paired(
             fastq_data_object.Interleaved_Read1_IDs,
@@ -123,6 +129,7 @@ def main():
         #TODO Write ouput file
         write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2, args.filetype)
 
+# paired
     elif fastq_data_object.Read2Index:
         Read1_IDs, Read2_IDs = subsample_paired(
             list(fastq_data_object.Read1Index.keys()),
@@ -132,7 +139,8 @@ def main():
         )
         #TODO Write ouput file
         write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2, args.filetype)
-    
+
+# single end
     else:
         Read_IDs = subsample_single(
             list(fastq_data_object.Read1Index.keys()),
