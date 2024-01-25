@@ -1,146 +1,236 @@
 #!/usr/bin/env python3
 import gzip
 import logging
+import os
 
 from Bio import SeqIO
 
-def write_reads(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, outputType, file_name_1, file_name_2, input_type):
+def write_single(fastq_object, Read1_IDs, outputFormat, compression, file_name_1):
 
-    def get_seq_from_IDs(input_fastq, id_list, input_type):
-
-        logging.debug(f'Getting sequences from {input_fastq}')
-        seq_records = {}
-
-        # Using set comprehension to extract just the prefix of the id for every id in the id list
-        id_set = set(each_ID.split()[0] for each_ID in id_list)
-
-        for record in SeqIO.parse(input_fastq, input_type):
-            if record.id in id_set:
-                seq_records[record.id] = record
-
-        logging.debug(f'Finished getting sequences from {input_fastq}')
-        return list(seq_records.values())
-
-    def write_output(file_name, sequences, outputFormat, compression):
-
-        logging.debug(f"Writing output to {file_name}")
+    for each_read_id in Read1_IDs:
 
         if compression or fastq_object.Read1Path.endswith(".gz"):
+
             if fastq_object.Read1Path.endswith(".gz"):
                 pass
             else:
                 file_name += ".gz"
-            with gzip.open(f'{file_name}', 'wt') as IDs_Seq_File: 
-                SeqIO.write(sequences, IDs_Seq_File, outputFormat)
 
-        else:
-            with open(f'{file_name}', 'wt') as IDs_Seq_File:
-                SeqIO.write(sequences, IDs_Seq_File, outputFormat)
-
-    def write_interleaved(sequences_1, sequences_2,output, outputFormat):
-
-        R1_count = 0
-        R2_count = 0
-        count = 1
-        
-        while count < (1 + 2*len(Read1_IDs)):
-            if count % 2 != 0 :
-                count += 1
-                SeqIO.write(sequences_1[R1_count], output, outputFormat)
-                R1_count += 1
+            if not os.path.isfile(file_name_1):
+                with gzip.open(f'{file_name_1}', 'wt') as IDs_Seq_File:                 
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
 
             else:
-                if count % 2 == 0:
-                    count+= 1
-                    SeqIO.write(sequences_2[R2_count], output, outputFormat)
-                    R2_count += 1
+                with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                    IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)))
 
-    if Read2_IDs == None:
-
-        logging.debug("Processing single-end file")
-        
-        if fastq_object.Read1Temp:
-            sequences_to_write = get_seq_from_IDs(fastq_object.Read1Temp, Read1_IDs, input_type)
-            write_output(file_name_1, sequences_to_write, outputFormat, compression)
         else:
-            sequences_to_write = get_seq_from_IDs(fastq_object.Read1Path, Read1_IDs, input_type)
-            write_output(file_name_1, sequences_to_write, outputFormat, compression)
 
-        logging.info(f"Finished writing to output: {file_name_1}")
+            if not os.path.isfile(file_name_1):
+                with open(f'{file_name_1}', 'wt') as IDs_Seq_File:
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
 
-    else:
-        
-        logging.debug("Processing interleaved/paired end file(s)")
-
-        # For interleaved processing        
-        if fastq_object.Interleaved_Read1_IDs != None and fastq_object.Interleaved_Read2_IDs != None:
-            if fastq_object.Read1Temp:
-                sequences_to_write_1 = get_seq_from_IDs(fastq_object.Read1Temp, Read1_IDs, input_type)
-                sequences_to_write_2 = get_seq_from_IDs(fastq_object.Read1Temp, Read2_IDs, input_type)
             else:
-                sequences_to_write_1 = get_seq_from_IDs(fastq_object.Read1Path, Read1_IDs, input_type)
-                sequences_to_write_2 = get_seq_from_IDs(fastq_object.Read1Path, Read2_IDs, input_type)
-            if outputType == "separate":
-                file_name_2 = file_name_1.split(".")[0] + "_Read_2.fastq"
-                file_name_1 = file_name_1.split(".")[0] + "_Read_1.fastq"
-                if compression or fastq_object.Read1Path.endswith('.gz'):
-                    file_name_1 += ".gz"
+                with open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+
+def process_joined(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1):
+
+    file_name_1 = "joined_" + file_name_1
+
+    for each_read_id in Read1_IDs:
+
+        if compression or fastq_object.Read1Path.endswith(".gz"):
+
+            if not fastq_object.Read1Path.endswith(".gz"):
+                file_name += ".gz"
+
+            if not os.path.isfile(file_name_1):
+                with gzip.open(f'{file_name_1}', 'wt') as IDs_Seq_File:                 
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+
+            else:
+                with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                    IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)))
+
+        else:
+
+            if not os.path.isfile(file_name_1):
+                with open(f'{file_name_1}', 'wt') as IDs_Seq_File:
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+
+            else:
+                with open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+
+    for each_read_id in Read2_IDs:
+
+        if compression or fastq_object.Read1Path.endswith(".gz"):
+            try:
+                with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:                 
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+            except KeyError:
+                with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:                 
+                    SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)
+        else:
+            try:   
+                with open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+            except KeyError:
+                with open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                    SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)
+
+def process_separate(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1, file_name_2):
+    
+    for each_read_id in Read1_IDs:
+
+        if compression or fastq_object.Read1Path.endswith(".gz"):
+
+            if not fastq_object.Read1Path.endswith(".gz"):
+                file_name_1 += ".gz"
+
+            if not os.path.isfile(file_name_1):
+                with gzip.open(f'{file_name_1}', 'wt') as IDs_Seq_File:                 
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+
+            else:
+                with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                    IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)))
+
+        else:
+
+            if not os.path.isfile(file_name_1):
+                with open(f'{file_name_1}', 'wt') as IDs_Seq_File:
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+
+            else:
+                with open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+
+    for each_read_id in Read2_IDs:
+
+        if not fastq_object.Read2Index:
+
+            if compression or fastq_object.Read1Path.endswith(".gz"):
+
+                if not fastq_object.Read1Path.endswith(".gz"):
                     file_name_2 += ".gz"
-                    
 
-        # For paired end processing
-        if fastq_object.Interleaved_Read1_IDs == None and fastq_object.Interleaved_Read2_IDs == None:
-            if fastq_object.Read1Temp:
-                sequences_to_write_1 = get_seq_from_IDs(fastq_object.Read1Temp, Read1_IDs, input_type)
+                if not os.path.isfile(file_name_2):
+                    with gzip.open(f'{file_name_2}', 'wt') as IDs_Seq_File:                 
+                        SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+
+                else:
+                    with gzip.open(f'{file_name_2}', 'at') as IDs_Seq_File:
+                        IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)))
+
             else:
-                sequences_to_write_1 = get_seq_from_IDs(fastq_object.Read1Path, Read1_IDs, input_type)
 
-            if fastq_object.Read2Temp:
-                sequences_to_write_2 = get_seq_from_IDs(fastq_object.Read2Temp, Read2_IDs, input_type)
+                if not os.path.isfile(file_name_2):
+                    with open(f'{file_name_2}', 'wt') as IDs_Seq_File:
+                        SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+
+                else:
+                    with open(f'{file_name_2}', 'at') as IDs_Seq_File:
+                        SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+
+        else:
+
+            if compression or fastq_object.Read1Path.endswith(".gz"):
+
+                if not fastq_object.Read1Path.endswith(".gz"):
+                    file_name_2 += ".gz"
+
+                if not os.path.isfile(file_name_2):
+                    with gzip.open(f'{file_name_2}', 'wt') as IDs_Seq_File:                 
+                        SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)
+
+                else:
+                    with gzip.open(f'{file_name_2}', 'at') as IDs_Seq_File:
+                        IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)))
+
             else:
-                sequences_to_write_2 = get_seq_from_IDs(fastq_object.Read2Path, Read2_IDs, input_type)
-        
-        if outputType == "separate":
 
-            write_output(file_name_1, sequences_to_write_1, outputFormat, compression)
-            logging.info(f"Finished writing to output: {file_name_1}")
-            
-            write_output(file_name_2, sequences_to_write_2, outputFormat, compression)           
-            logging.info(f"Finished writing to output: {file_name_2}")
-            
-        if outputType == "interleaved":
+                if not os.path.isfile(file_name_2):
+                    with open(f'{file_name_2}', 'wt') as IDs_Seq_File:
+                        SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)
 
-            file_name = file_name_1.split(".")[0]
-            file_name = file_name + "_interleaved.fastq"
+                else:
+                    with open(f'{file_name_2}', 'at') as IDs_Seq_File:
+                        SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)
 
-            if fastq_object.Read1Path.endswith(".gz") or compression:
+def process_interleaved(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1):
+
+    file_name_1 = "interleaved_" + file_name_1
+
+    count = 1
+    read1_count = 0
+    read2_count = 0
+
+    while count < (1 + 2*len(Read1_IDs)):
+        if count % 2 != 0 :
+
+            read1 = Read1_IDs[read1_count]
+
+            if compression or fastq_object.Read1Path.endswith(".gz"):
                 if fastq_object.Read1Path.endswith(".gz"):
+                    pass
+                else:
                     file_name += ".gz"
-
-                with gzip.open(f'{file_name}', 'wt') as output:
-                    write_interleaved(sequences_to_write_1, sequences_to_write_2, output, outputFormat)
-
+                if not os.path.isfile(file_name_1):
+                    with gzip.open(f'{file_name_1}', 'wt') as IDs_Seq_File: 
+                        SeqIO.write(fastq_object.Read1Index[read1], IDs_Seq_File, outputFormat)
+                else:
+                    with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                        IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read1Index[read1], IDs_Seq_File, outputFormat)))
             else:
-                with open(f'{file_name}', 'wt') as output:
-                    write_interleaved(sequences_to_write_1, sequences_to_write_2, output, outputFormat)
+                if not os.path.isfile(file_name_1):
+                    with open(f'{file_name_1}', 'wt') as IDs_Seq_File:
+                        SeqIO.write(fastq_object.Read1Index[read1], IDs_Seq_File, outputFormat)
+                else:
+                    with open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                        SeqIO.write(fastq_object.Read1Index[read1], IDs_Seq_File, outputFormat)
+            count += 1
+            read1_count += 1
 
-            logging.info(f"Finished writing to output: {file_name}")
+        else:
 
-        if outputType == "joined":    
-            if fastq_object.Read1Path.endswith(".gz") or compression:
-                file_name = file_name_1.split(".")[0]
-                file_name = file_name + "_joined.fastq.gz"
-                with gzip.open(f'{file_name}', 'wt') as IDs_Seq_File: 
-                    SeqIO.write(sequences_to_write_1, IDs_Seq_File, outputFormat)    
-                    SeqIO.write(sequences_to_write_2, IDs_Seq_File, outputFormat)
+            if count % 2 == 0:
 
-            else:
-                file_name = file_name_1.split(".")[0]
-                file_name = file_name + "_joined.fastq"
-                with open(f'{file_name}', 'wt') as IDs_Seq_File: 
-                    SeqIO.write(sequences_to_write_1, IDs_Seq_File, outputFormat)    
-                    SeqIO.write(sequences_to_write_2, IDs_Seq_File, outputFormat)
+                read2 = Read2_IDs[read2_count]
 
-            logging.info(f"Finished writing to output: {file_name}")
+                if not fastq_object.Read2Index:
+
+                    if compression or fastq_object.Read1Path.endswith(".gz"):
+                        with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:                 
+                            SeqIO.write(fastq_object.Read1Index[read2], IDs_Seq_File, outputFormat)
+
+                    else:
+                        with open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                            SeqIO.write(fastq_object.Read1Index[read2], IDs_Seq_File, outputFormat)
+
+                else:
+
+                    if compression or fastq_object.Read1Path.endswith(".gz"):
+                        with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:                 
+                            SeqIO.write(fastq_object.Read2Index[read2], IDs_Seq_File, outputFormat)
+
+                    else:
+                        with open(f'{file_name_1}', 'at') as IDs_Seq_File:
+                            SeqIO.write(fastq_object.Read2Index[read2], IDs_Seq_File, outputFormat)
+
+                read2_count += 1
+                count += 1
+
+def write_interleaved_paired_end(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1, file_name_2, outputType):
+
+    if outputType == 'separate':
+        process_separate(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1, file_name_2)
+
+    if outputType == 'joined':
+        process_joined(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1)
+
+    if outputType == 'interleaved':
+        process_interleaved(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1)
 
     logging.info("Finished processing, Sylens exiting.")

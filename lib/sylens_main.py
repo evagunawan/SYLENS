@@ -8,7 +8,8 @@ import logging
 
 from lib.subsampling import subsample_single, subsample_paired
 from lib.read_fastq_file import FastqFileData
-from lib.write_output_file import write_reads
+from lib.write_output_file import write_single, write_interleaved_paired_end
+# write_interleaved, write_paired, write_single
 
 
 # Creating class that displays help if no information is entered in parser and changes how the error is displayed when something is entered wrong
@@ -74,22 +75,31 @@ def main():
     args = parser.parse_args()
 
     #Format for logging debug-critical information
-    logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
+    logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
+
+    # If no subsampling is desired
+    if args.subsample == None:
+        args.subsample = 100
+        args.percentage = True
 
     #Creating file output name
-    if args.subsample:
+    if args.subsample == 100 and args.percentage == True:
+
+        file_naming_convention_1 = f'non_downsampled_{args.Read1}'    
+
+        if args.Read2 != None:
+            file_naming_convention_2 = f'non_downsampled_{args.Read2}'  
+        else:
+            file_naming_convention_2 = f'non_downsampled_Read2_{args.Read2}' 
+
+    else:
+
         file_naming_convention_1 = f'{args.seed}_downsampled_{args.Read1}'
+
         if args.Read2 != None:
             file_naming_convention_2 = f'{args.seed}_downsampled_{args.Read2}'
         else:
-            file_naming_convention_2 = None
-
-    if args.subsample == 100 and args.percentage:
-        file_naming_convention_1 = f'non_downsampled_{args.Read1}'    
-        if args.Read2 != None:    
-            file_naming_convention_2 = f'non_downsampled_{args.Read2}'  
-        else:
-            file_naming_convention_2 = None
+            file_naming_convention_2 = f'{args.seed}_downsampled_Read2_{args.Read1}'
 
 
     '''
@@ -120,8 +130,8 @@ def main():
             subsample_level,
             args.seed
         )
-        #TODO Write ouput file
-        write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2, args.filetype)
+        #TODO Write interleaved ouput file
+        write_interleaved_paired_end(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, file_naming_convention_1, file_naming_convention_2, args.output_type)
 
     elif fastq_data_object.Read2Index:
         Read1_IDs, Read2_IDs = subsample_paired(
@@ -130,8 +140,8 @@ def main():
             subsample_level,
             args.seed
         )
-        #TODO Write ouput file
-        write_reads(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2, args.filetype)
+        #TODO Write paired end ouput file
+        write_interleaved_paired_end(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, file_naming_convention_1, file_naming_convention_2, args.output_type)
     
     else:
         Read_IDs = subsample_single(
@@ -139,8 +149,7 @@ def main():
             subsample_level,
             args.seed
         )
-        #TODO Write ouput file
-        write_reads(fastq_data_object, Read_IDs, None, args.outputFormat, args.compress, args.output_type, file_naming_convention_1, file_naming_convention_2, args.filetype)
-
+        # Write single end ouput file
+        write_single(fastq_data_object, Read_IDs, args.outputFormat, args.compress, file_naming_convention_1)
     fastq_data_object.cleanUP()
     sys.exit(0)
