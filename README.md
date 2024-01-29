@@ -65,7 +65,7 @@ Subsampling with Sylens is done through the `-s` or `--subsample` flag with the 
 sylens FILE1.fastq -s 1000
 ```
 
-By default Sylens will subsample to the exact integer indicated after the `-s` flag. If a percentage is preferred, use the flag `-p` or `--percentage` to take a percentage of the samples.
+By default Sylens will subsample to the exact integer indicated after the `-s` flag. If a percentage is preferred, use the `-p` or `--percentage` flag to take a percentage of the samples.
 ```
 sylens FILE1.fastq -p 10
 ```
