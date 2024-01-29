@@ -5,11 +5,9 @@ import os
 
 from Bio import SeqIO
 
-def write_single(fastq_object, Read1_IDs, outputFormat, compression, file_name_1):
+def process_and_write_reads(fastq_object, compression, read_id, file_name, outputFormat, index):
 
-    for each_read_id in Read1_IDs:
-
-        # If compression is desired or if original file was compressed
+    # If compression is desired or if original file was compressed
         if compression or fastq_object.Read1Path.endswith(".gz"):
 
             if fastq_object.Read1Path.endswith(".gz"):
@@ -18,189 +16,104 @@ def write_single(fastq_object, Read1_IDs, outputFormat, compression, file_name_1
                 file_name += ".gz"
 
             # If the file path does not exist, create and write to the file
-            if not os.path.isfile(file_name_1):
-                with gzip.open(f'{file_name_1}', 'wt') as IDs_Seq_File:                 
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+            if not os.path.isfile(file_name):
+                with gzip.open(f'{file_name}', 'wt') as IDs_Seq_File:                 
+                    SeqIO.write(index[read_id], IDs_Seq_File, outputFormat)
 
             # If the file path does exist, append to the file
             else:
-                with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:
-                    IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)))
+                with gzip.open(f'{file_name}', 'at') as IDs_Seq_File:
+                    IDs_Seq_File.write(str(SeqIO.write(index[read_id], IDs_Seq_File, outputFormat)))
 
         # If no compression is desired
         else:
 
             # If the file path does not exist, create and write to the file
-            if not os.path.isfile(file_name_1):
-                with open(f'{file_name_1}', 'wt') as IDs_Seq_File:
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+            if not os.path.isfile(file_name):
+                with open(f'{file_name}', 'wt') as IDs_Seq_File:
+                    SeqIO.write(index[read_id], IDs_Seq_File, outputFormat)
 
             # If the file path does exist, append to the file
             else:
-                with open(f'{file_name_1}', 'at') as IDs_Seq_File:
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+                with open(f'{file_name}', 'at') as IDs_Seq_File:
+                    SeqIO.write(index[read_id], IDs_Seq_File, outputFormat)
+
+def process_read1_read2_index(fastq_object, compression, read_id, file_name_1, file_name_2, outputFormat, outputType):
+
+    if compression or fastq_object.Read1Path.endswith(".gz"):
+            
+        # First try to access the Read 1 index (for interleaved files)
+        try:
+            with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:                 
+                SeqIO.write(fastq_object.Read1Index[read_id], IDs_Seq_File, outputFormat)
+            
+        # If try returns key error, next use Read 2 index for paired end files
+        except KeyError:
+            with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:                 
+                SeqIO.write(fastq_object.Read2Index[read_id], IDs_Seq_File, outputFormat)
+
+    # If no compression is desired
+    else:
+        if outputType == "separate":
+            file_name = file_name_2
+
+        else:
+            file_name = file_name_1
+
+        if fastq_object.Read2Index:
+            index = fastq_object.Read2Index
+            
+        else:
+            index = fastq_object.Read1Index
+
+        # First try to access the Read 1 index (for interleaved files)
+        try:   
+            with open(f'{file_name}', 'at') as IDs_Seq_File:
+                SeqIO.write(index[read_id], IDs_Seq_File, outputFormat)
+
+        # If try returns key error, next use Read 2 index for paired end files
+        except KeyError:
+            with open(f'{file_name}', 'at') as IDs_Seq_File:
+                SeqIO.write(fastq_object.Read2Index[read_id], IDs_Seq_File, outputFormat)
+
+def write_single(fastq_object, Read1_IDs, outputFormat, compression, file_name_1):
+
+    for each_read_id in Read1_IDs:
+
+        process_and_write_reads(fastq_object, compression, each_read_id, file_name_1, outputFormat, fastq_object.Read1Index)
 
 def process_joined(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1):
 
     file_name_1 = "joined_" + file_name_1
 
     for each_read_id in Read1_IDs:
-
-        # If compression is desired or if original file was compressed
-        if compression or fastq_object.Read1Path.endswith(".gz"):
-
-            if not fastq_object.Read1Path.endswith(".gz"):
-                file_name += ".gz"
-
-            # If the file path does not exist, create and write to the file
-            if not os.path.isfile(file_name_1):
-                with gzip.open(f'{file_name_1}', 'wt') as IDs_Seq_File:                 
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
-
-            # If the file path does exist, append to the file
-            else:
-                with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:
-                    IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)))
-
-        # If compression is not desired
-        else:
-
-            # If the file path does exist, create and write to the file
-            if not os.path.isfile(file_name_1):
-                with open(f'{file_name_1}', 'wt') as IDs_Seq_File:
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
-
-            # If the file path does exist, append to the file
-            else:
-                with open(f'{file_name_1}', 'at') as IDs_Seq_File:
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
-
-    for each_read_id in Read2_IDs:
-
-        # If compression is desired
-        if compression or fastq_object.Read1Path.endswith(".gz"):
-            
-            # First try to access the Read 1 index (for interleaved files)
-            try:
-                with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:                 
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
-            
-            # If try returns key error, next use Read 2 index for paired end files
-            except KeyError:
-                with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:                 
-                    SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)
-
-        # If no compression is desired
-        else:
-
-            # First try to access the Read 1 index (for interleaved files)
-            try:   
-                with open(f'{file_name_1}', 'at') as IDs_Seq_File:
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
-
-            # If try returns key error, next use Read 2 index for paired end files
-            except KeyError:
-                with open(f'{file_name_1}', 'at') as IDs_Seq_File:
-                    SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)
-
-def process_separate(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1, file_name_2):
-    
-    for each_read_id in Read1_IDs:
-
-        # If compression is desired or if original file was compressed
-        if compression or fastq_object.Read1Path.endswith(".gz"):
-
-            if not fastq_object.Read1Path.endswith(".gz"):
-                file_name_1 += ".gz"
-
-            # If the file path does not exist, create and write to the file
-            if not os.path.isfile(file_name_1):
-                with gzip.open(f'{file_name_1}', 'wt') as IDs_Seq_File:                 
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
-
-            # If the file path does exist, append to the file
-            else:
-                with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:
-                    IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)))
-
-        # If no compression is desired
-        else:
-
-            # If the file path does not exist, create and write to the file
-            if not os.path.isfile(file_name_1):
-                with open(f'{file_name_1}', 'wt') as IDs_Seq_File:
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
-
-            # If the file path does exist, append to the file
-            else:
-                with open(f'{file_name_1}', 'at') as IDs_Seq_File:
-                    SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
+        process_and_write_reads(fastq_object, compression, each_read_id, file_name_1, outputFormat, fastq_object.Read1Index)
 
     for each_read_id in Read2_IDs:
 
         # If Read 2 index doesn't exist (Interleaved)
         if not fastq_object.Read2Index:
+            process_and_write_reads(fastq_object, compression, each_read_id, file_name_1, outputFormat, fastq_object.Read1Index)
 
-            # If compression is desired or original file is compressed
-            if compression or fastq_object.Read1Path.endswith(".gz"):
-
-                if not fastq_object.Read1Path.endswith(".gz"):
-                    file_name_2 += ".gz"
-
-                # If the file path does not exist, create and write to the file
-                if not os.path.isfile(file_name_2):
-                    with gzip.open(f'{file_name_2}', 'wt') as IDs_Seq_File:                 
-                        SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
-
-                # If the file path does exist, append to the file
-                else:
-                    with gzip.open(f'{file_name_2}', 'at') as IDs_Seq_File:
-                        IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)))
-
-            # If compression is not desired
-            else:
-
-                # If the file path does not exist, create and write to the file
-                if not os.path.isfile(file_name_2):
-                    with open(f'{file_name_2}', 'wt') as IDs_Seq_File:
-                        SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
-
-                # If the file path does exist, append to the file
-                else:
-                    with open(f'{file_name_2}', 'at') as IDs_Seq_File:
-                        SeqIO.write(fastq_object.Read1Index[each_read_id], IDs_Seq_File, outputFormat)
-
-        # If Read 2 Index exists
+        # If Read 2 Index exists (Paired)
         else:
+            process_and_write_reads(fastq_object, compression, each_read_id, file_name_1, outputFormat, fastq_object.Read2Index)
 
-            # If compression is desired or original file is compressed
-            if compression or fastq_object.Read1Path.endswith(".gz"):
+def process_separate(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1, file_name_2):
+    
+    for each_read_id in Read1_IDs:
+        process_and_write_reads(fastq_object, compression, each_read_id, file_name_1, outputFormat, fastq_object.Read1Index)
 
-                if not fastq_object.Read1Path.endswith(".gz"):
-                    file_name_2 += ".gz"
+    for each_read_id in Read2_IDs:
 
-                # If the file path does not exist, create and write to the file
-                if not os.path.isfile(file_name_2):
-                    with gzip.open(f'{file_name_2}', 'wt') as IDs_Seq_File:                 
-                        SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)
+        # If Read 2 index doesn't exist (Interleaved)
+        if not fastq_object.Read2Index:
+            process_and_write_reads(fastq_object, compression, each_read_id, file_name_2, outputFormat, fastq_object.Read1Index)
 
-                # If the file path does exist, append to the file
-                else:
-                    with gzip.open(f'{file_name_2}', 'at') as IDs_Seq_File:
-                        IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)))
 
-            # If no compression is desired
-            else:
-
-                # If the file path does not exist, create and write to the file
-                if not os.path.isfile(file_name_2):
-                    with open(f'{file_name_2}', 'wt') as IDs_Seq_File:
-                        SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)
-
-                # If the file path does exist, append to the file
-                else:
-                    with open(f'{file_name_2}', 'at') as IDs_Seq_File:
-                        SeqIO.write(fastq_object.Read2Index[each_read_id], IDs_Seq_File, outputFormat)
+        # If Read 2 Index exists (Paired)
+        else:
+            process_and_write_reads(fastq_object, compression, each_read_id, file_name_2, outputFormat, fastq_object.Read2Index)
 
 def process_interleaved(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1):
 
@@ -227,7 +140,7 @@ def process_interleaved(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compre
                     with gzip.open(f'{file_name_1}', 'wt') as IDs_Seq_File: 
                         SeqIO.write(fastq_object.Read1Index[read1], IDs_Seq_File, outputFormat)
                 
-                # If the file path does  exist, append to the file
+                # If the file path does exist, append to the file
                 else:
                     with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:
                         IDs_Seq_File.write(str(SeqIO.write(fastq_object.Read1Index[read1], IDs_Seq_File, outputFormat)))
@@ -250,7 +163,6 @@ def process_interleaved(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compre
         else:
 
             if count % 2 == 0:
-
                 read2 = Read2_IDs[read2_count]
 
                 # If Read 2 Index does not exist (Interleaved)
