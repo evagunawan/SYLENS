@@ -25,7 +25,6 @@ class DownsamplerParser(argparse.ArgumentParser):
 def main():
     # Downsampler program description 
     parser = DownsamplerParser(prog = 'Subsampler for FASTQ file(s)',
-        # usage="sylens [optional arguments] <application/workflow> [application/workflow arguments]",
         description = 'Enter in FASTQ file(s) and down sample based on a user supplied integer. If no user input is added the entire file is sampled and output as chosen filetype.',
         epilog = "Additional information and a README.md can be found at https://github.com/evagunawan/SYLENS"
         )
@@ -61,9 +60,8 @@ def main():
         help = "Compress fastq file into fastq.gz file on output. I.E. -c"
         )
     parser.add_argument('-p', '--percentage',
-        default = False,
-        action = 'store_true',
-        help = "With the -p flag, subsampling is done as a percentage of reads instead of an indicated number of reads. Percentage of reads should be an integer between 1-100. I.E. -p -s 15"
+        type = int,
+        help = "Subsampling is done as a percentage of reads instead of an indicated number of reads. Percentage of reads should be an integer between 1-100. I.E. -p 15"
         )
     parser.add_argument('--output_type',
         choices = ['separate', 'joined', 'interleaved'],
@@ -78,12 +76,11 @@ def main():
     logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
 
     # If no subsampling is desired
-    if args.subsample == None:
-        args.subsample = 100
-        args.percentage = True
+    if args.subsample == None and args.percentage == None:
+        args.percentage = 100
 
     #Creating file output name
-    if args.subsample == 100 and args.percentage == True:
+    if args.percentage == 100:
 
         file_naming_convention_1 = f'non_downsampled_{args.Read1}'    
 
@@ -117,11 +114,13 @@ def main():
 
     #If percentage given determine subsample level
     if args.percentage:
-        subsample_level = int((fastq_data_object.R1_Total_Reads)*(args.subsample) / (100))
-        logging.debug(f'The amount to subsample is: {subsample_level}')
+        subsample_level = int((fastq_data_object.R1_Total_Reads)*(args.percentage) / (100))
 
     else:
         subsample_level = args.subsample
+
+    logging.debug(f'The amount to subsample is: {subsample_level}.')
+    logging.debug(f'The total amount of reads: {fastq_data_object.R1_Total_Reads}.')
 
     if fastq_data_object.Interleaved_Read1_IDs:
         Read1_IDs, Read2_IDs = subsample_paired(
@@ -130,7 +129,6 @@ def main():
             subsample_level,
             args.seed
         )
-        #TODO Write interleaved ouput file
         write_interleaved_paired_end(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, file_naming_convention_1, file_naming_convention_2, args.output_type)
 
     elif fastq_data_object.Read2Index:
@@ -140,7 +138,6 @@ def main():
             subsample_level,
             args.seed
         )
-        #TODO Write paired end ouput file
         write_interleaved_paired_end(fastq_data_object, Read1_IDs, Read2_IDs, args.outputFormat, args.compress, file_naming_convention_1, file_naming_convention_2, args.output_type)
     
     else:
@@ -149,7 +146,6 @@ def main():
             subsample_level,
             args.seed
         )
-        # Write single end ouput file
         write_single(fastq_data_object, Read_IDs, args.outputFormat, args.compress, file_naming_convention_1)
     fastq_data_object.cleanUP()
     sys.exit(0)

@@ -34,7 +34,7 @@ Authors
 
 ![Sylens Program Map](Assets/Program_Map_Sylens.PNG)
 
-Sylens works by analyzing the ID configuration of the supplied FASTQ file(s). Currently, Sylens can analyze NCBI, Illumina, and Casava formatted FASTQ files. The program then determines if the input file is an interleaved or single end file. If subsampling is desired, it will randomly subsample the FASTQ files and generate a seed for the run. This seed can be used to reproduce results, if desired. File formatting can be converted to and from ASCII 64 (FASTQ-solexa) and ASCII 33 (sanger) formats. The files can be written in both compressed and uncompressed format. 
+Sylens works by analyzing the ID configuration of the supplied FASTQ file(s). Currently, Sylens can analyze NCBI, Illumina, and Casava formatted FASTQ files. The program then determines if the input file is an interleaved or single end file or processes paired end files. If subsampling is desired, it will randomly subsample the FASTQ files and generate a seed for the run. This seed can be used to reproduce results, if desired. File formatting can be converted to and from ASCII 64 (FASTQ-solexa) and ASCII 33 (sanger) formats. The files can be written in both compressed and uncompressed format. 
 
 ### **Legend**
 ![Sylens Legend](Assets/legend_Sylens.PNG)
@@ -65,12 +65,12 @@ Subsampling with Sylens is done through the `-s` or `--subsample` flag with the 
 sylens FILE1.fastq -s 1000
 ```
 
-By default Sylens will subsample to the exact integer indicated after the `-s` flag. If a percentage is preferred, use the flag `-p` or `--percentage` with the subsample integer to take a percentage of the samples.
+By default Sylens will subsample to the exact integer indicated after the `-s` flag. If a percentage is preferred, use the flag `-p` or `--percentage` to take a percentage of the samples.
 ```
-sylens FILE1.fastq -p -s 10
+sylens FILE1.fastq -p 10
 ```
 
-Compressing a file on output is done by using the `-c` or `--compression` flag. If a .gz file is input, the output will automatically be .gz. By default, no compression occurs on output.
+Compressing a file on output is done by using the `-c` or `--compression` flag. If a .gz file is input, the output will automatically be .gz. By default, if the input file is compressed, the output file will be compressed.
 ```
 sylens FILE1.fastq -c
 ```
@@ -80,43 +80,58 @@ By default, files output by Sylens are in sanger FASTQ format. Changing output f
 sylens FILE1.fastq -o fastq-solexa
 ```
 
-For reproducibility, Sylens provides a seed number. To denote a seed generated from a previous run, use the `--seed` flag with the seed number as well as the previously entered subsampling information. If applicable, entered the input and output filetypes. 
+For reproducibility, Sylens provides a seed number. To denote a seed generated from a previous run, use the `--seed` flag with the seed number as well as the previously entered subsampling information, if applicable. 
 ```
 sylens FILE1.fastq --seed 1691696502 -s 1000 -f fastq-solexa -o fastq
 ```
 
 If any additional explanations are needed, use the `-h` or `--help` flag.
 ```
-sylens FILE1.fastq --help
+sylens --help
 ```
 
-If entering an interleaved file or pair end files, the way the output is written can be changed with `--output_type`. Currently there are 3 written output types: separate, joined, and interleaved. Separate produces two files, a read 1 and read 2. Joined produces one file with all read 1 entries first and all read 2 entries second. Interleaved produces an alternating pattern of read 1 and read 2 in one file. By default, files are separated.   
+If entering an interleaved file or pair end files, the way the output is written can be changed with `--output_type`. Currently there are 3 written output types: separate, joined, and interleaved. `--output_type separate` produces two files, a read 1 file and read 2 file. `--output_type joined` produces one file with all read 1 entries first and then all read 2 entries second. `--output_type interleaved` produces an alternating pattern of read 1 and read 2 in one file. By default, files are separated.   
 ```
 sylens INTERLEAVED.fastq --output_type interleaved
 ```
 
 Multiple flags can be utilized in one line of code, if desired. For example, this line of code reproduces the results from a previous run with a seed = 1691696502 for paired end FASTQ-solexa files, downsamples to 10%, and writes the output in one compressed FASTQ sanger file with all read 1 entries first and read 2 entries last.
 ```
-sylens FILE1.fastq FILE2.fastq -p -s 10 -c --seed 1691696502 -f fastq-solexa -o fastq --output_type joined
+sylens FILE1.fastq FILE2.fastq -p 10 -c --seed 1691696502 -f fastq-solexa -o fastq --output_type joined
 ```
 
-If no downsampling is desired combining the subsample and percentage flags like so, `-p -s 100`, will give the ability to not downsample but change the written output. In this example the fastq-solexa interleaved file will not be downsampled and will be written as a sanger fastq file with all read 1 entries first and all read 2 entries second in one file.
+If no downsampling is desired, Sylens will give the ability to not downsample but change the written output. In this example the fastq-solexa interleaved file will not be downsampled and will be written as two sanger fastq files with all read 1 entries in one file and all read 2 entries in a second file.
 ```
-sylens INTERLEAVED.fastq -p -s 100 -f fastq-sanger -o fastq --output_type joined
+sylens INTERLEAVED.fastq -f fastq-sanger -o fastq --output_type separate
 ```
 
 ---
 
 ## **OUTPUT**
 
-Output files by default will be written in ASCII 33 FASTQ format. If the output filetype indicated is differet than the input format, Bio.SeqIO will write it to the desired output. Currently two formats are supported: ASCII 64 (fastq-solexa) and ASCII 33 (sanger). If subsampling occurs, the seed value will be stored in the file name.
+Output files by default will be written in ASCII 33 FASTQ format. If the output filetype indicated is different than the input format, Bio.SeqIO will write the desired output formatting. Currently two formats are supported: ASCII 64 (fastq-solexa) and ASCII 33 (sanger). If subsampling occurs, the seed value will be stored in the file name. In cases where `--output_type joined` or `--output_type interleaved` is utilized, file names will indicate their output type in the name of the file. Depending on the use case, Sylens may generate a read 2 file name if no read 2 file is input but desired on output. 
 
-#### Subsampling output name formatting is :
+#### Subsampling file naming convention :
 ```
 {Seed Value}_downsampled_{Original File name} 
 ```
 
-#### No subsampling output name formatting is :
+#### By default Sylens will use `--output_type separate`. If no read 2 file is supplied i.e. using an interleaved input file, Sylens will generate the read 2 file naming convention based off of the original read 1 file name: 
+```
+{Seed Value}_downsampled_Read2_{Read 1 File name}
+```
+
+#### Subsampling with `--output_type interleaved` uses the file naming convention of :
+```
+interleaved_{Seed Value}_downsampled_{Original File name}
+```
+
+#### Subsampling with `--output_type joined` uses the file naming convention of :
+```
+joined_{Seed Value}_downsampled_{Original File name}
+```
+
+#### No subsampling uses the file naming convention of :
 ```
 non_downsampled_{Original file name}
 ```
