@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gzip && \
     apt-get autoclean && rm -rf /var/lib/apt/lists/* 
 RUN pip3 install argparse \
-    biopython>=1.81 && \
+    biopython && \
     mkdir data
 
 # Grabbing Sylens from github
@@ -44,8 +44,6 @@ CMD ["sylens", "--help"]
 #Testing the image
 FROM app as test
 
-WORKDIR /test
+WORKDIR /
 
-RUN wget -O sample1_R1.fastq.gz "https://github.com/nf-core/test-datasets/raw/ampliseq/testdata/1_S103_L001_R1_001.fastq.gz"
-
-RUN sylens sample1_R1.fastq.gz -s 10
+RUN sylens SYLENS-main/docker_test/docker_testing.fastq -s 1
