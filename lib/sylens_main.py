@@ -5,6 +5,7 @@ import argparse
 import sys 
 import time
 import logging
+import os
 
 from lib.subsampling import subsample_single, subsample_paired
 from lib.read_fastq_file import FastqFileData
@@ -75,10 +76,28 @@ def main():
     #Format for logging debug-critical information
     logging.basicConfig(level = logging.DEBUG, format = '%(levelname)s : %(message)s')
 
+    '''
+    Set seed value to time since e`poch that way each time program is run, 
+    seed value is different. If user enters seed value, program will 
+    reproduce the same results 
+    '''
+    
+    logging.info(f"This run's seed number is {args.seed}")
+
+    logging.debug('Starting processing of file(s)')
+
+    #Created fastq file object using the parameters specified in secondary script 
+    fastq_data_object = FastqFileData(args.Read1, args.Read2, args.filetype)
+
     # If no subsampling is desired
     if args.subsample == None and args.percentage == None:
         args.percentage = 100
 
+    # Grabbing just the file name if a file path is included.
+    args.Read1 = os.path.basename(args.Read1)
+    if args.Read2:
+        args.Read2 = os.path.basename(args.Read2)
+    
     #Creating file output name
     if args.percentage == 100:
 
@@ -97,21 +116,6 @@ def main():
             file_naming_convention_2 = f'{args.seed}_downsampled_{args.Read2}'
         else:
             file_naming_convention_2 = f'{args.seed}_downsampled_Read2_{args.Read1}'
-
-
-    '''
-    Set seed value to time since e`poch that way each time program is run, 
-    seed value is different. If user enters seed value, program will 
-    reproduce the same results 
-    '''
-    
-    logging.info(f"This run's seed number is {args.seed}")
-
-    logging.debug('Starting processing of file(s)')
-
-    #Created fastq file object using the parameters specified in secondary script 
-    fastq_data_object = FastqFileData(args.Read1, args.Read2, args.filetype)
-
     #If percentage given determine subsample level
     if args.percentage:
         subsample_level = int((fastq_data_object.R1_Total_Reads)*(args.percentage) / (100))
