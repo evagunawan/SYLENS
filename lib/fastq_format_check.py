@@ -95,4 +95,3 @@ def get_interleaved_ids(ReadIndex):
     
     else:
         logging.warn("There were a differing number of R1 to R2 reads in the interleaved fastq.")
-

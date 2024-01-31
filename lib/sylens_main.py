@@ -10,7 +10,7 @@ import os
 from lib.subsampling import subsample_single, subsample_paired
 from lib.read_fastq_file import FastqFileData
 from lib.write_output_file import write_single, write_interleaved_paired_end
-# write_interleaved, write_paired, write_single
+
 
 
 # Creating class that displays help if no information is entered in parser and changes how the error is displayed when something is entered wrong
