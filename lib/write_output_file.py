@@ -38,44 +38,6 @@ def process_and_write_reads(fastq_object, compression, read_id, file_name, outpu
                 with open(f'{file_name}', 'at') as IDs_Seq_File:
                     SeqIO.write(index[read_id], IDs_Seq_File, outputFormat)
 
-def process_read1_read2_index(fastq_object, compression, read_id, file_name_1, file_name_2, outputFormat, outputType):
-
-    if compression or fastq_object.Read1Path.endswith(".gz"):
-            
-        # First try to access the Read 1 index (for interleaved files)
-        try:
-            with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:                 
-                SeqIO.write(fastq_object.Read1Index[read_id], IDs_Seq_File, outputFormat)
-            
-        # If try returns key error, next use Read 2 index for paired end files
-        except KeyError:
-            with gzip.open(f'{file_name_1}', 'at') as IDs_Seq_File:                 
-                SeqIO.write(fastq_object.Read2Index[read_id], IDs_Seq_File, outputFormat)
-
-    # If no compression is desired
-    else:
-        if outputType == "separate":
-            file_name = file_name_2
-
-        else:
-            file_name = file_name_1
-
-        if fastq_object.Read2Index:
-            index = fastq_object.Read2Index
-            
-        else:
-            index = fastq_object.Read1Index
-
-        # First try to access the Read 1 index (for interleaved files)
-        try:   
-            with open(f'{file_name}', 'at') as IDs_Seq_File:
-                SeqIO.write(index[read_id], IDs_Seq_File, outputFormat)
-
-        # If try returns key error, next use Read 2 index for paired end files
-        except KeyError:
-            with open(f'{file_name}', 'at') as IDs_Seq_File:
-                SeqIO.write(fastq_object.Read2Index[read_id], IDs_Seq_File, outputFormat)
-
 def write_single(fastq_object, Read1_IDs, outputFormat, compression, file_name_1):
 
     for each_read_id in Read1_IDs:
@@ -109,7 +71,6 @@ def process_separate(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compressi
         # If Read 2 index doesn't exist (Interleaved)
         if not fastq_object.Read2Index:
             process_and_write_reads(fastq_object, compression, each_read_id, file_name_2, outputFormat, fastq_object.Read1Index)
-
 
         # If Read 2 Index exists (Paired)
         else:
