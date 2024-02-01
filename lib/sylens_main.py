@@ -106,7 +106,7 @@ def main():
         if args.Read2 != None:
             file_naming_convention_2 = f'non_downsampled_{args.Read2}'  
         else:
-            file_naming_convention_2 = f'non_downsampled_Read2_{args.Read2}' 
+            file_naming_convention_2 = f'non_downsampled_Read2_{args.Read1}' 
 
     else:
 
@@ -116,6 +116,7 @@ def main():
             file_naming_convention_2 = f'{args.seed}_downsampled_{args.Read2}'
         else:
             file_naming_convention_2 = f'{args.seed}_downsampled_Read2_{args.Read1}'
+
     #If percentage given determine subsample level
     if args.percentage:
         subsample_level = int((fastq_data_object.R1_Total_Reads)*(args.percentage) / (100))
