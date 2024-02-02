@@ -122,5 +122,4 @@ def write_interleaved_paired_end(fastq_object, Read1_IDs, Read2_IDs, outputForma
     if outputType == 'interleaved':
         process_interleaved(fastq_object, Read1_IDs, Read2_IDs, outputFormat, compression, file_name_1)
 
-
-logging.info("Finished processing, Sylens exiting.")
+logging.info("Finished writing output files.")

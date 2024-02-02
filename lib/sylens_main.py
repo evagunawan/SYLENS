@@ -74,7 +74,8 @@ def main():
     args = parser.parse_args()
 
     #Format for logging debug-critical information
-    logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s')
+    logging.basicConfig(level = logging.INFO, format = '%(levelname)s : %(message)s', force = True)
+  
 
     '''
     Set seed value to time since e`poch that way each time program is run, 
@@ -124,8 +125,9 @@ def main():
     else:
         subsample_level = args.subsample
 
-    logging.debug(f'The amount to subsample is: {subsample_level}.')
-    logging.debug(f'The total amount of reads: {fastq_data_object.R1_Total_Reads}.')
+    logging.info(f'The total amount of reads: {fastq_data_object.R1_Total_Reads}.')
+    logging.info(f'The amount to subsample is: {subsample_level}.')
+    logging.info(f'Beginning to write output files.')
 
     if fastq_data_object.Interleaved_Read1_IDs:
         Read1_IDs, Read2_IDs = subsample_paired(
@@ -152,5 +154,7 @@ def main():
             args.seed
         )
         write_single(fastq_data_object, Read_IDs, args.outputFormat, args.compress, file_naming_convention_1)
+    logging.info("Finished writing to files.")
     fastq_data_object.cleanUP()
+    logging.info("Finished processing, Sylens exiting.")
     sys.exit(0)
