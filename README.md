@@ -146,7 +146,7 @@ Find a bug? Let me know! I'm still learning so any additional guidance, comments
 
 ## **Known Issues**
 
-None at the moment.
+Sylens is limited by one thread. This causes a slow down in large file processing - especially for non-downsampled files. Currently we are developing a multi-threading option that should give the ability to process larger files with multiple threads. 
 
 ---
 ## **AUTHORS**
